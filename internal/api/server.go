@@ -378,9 +378,14 @@ func (s *Server) handleUsersCreate(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, r, http.StatusBadRequest, "CONFIG_INVALID", err.Error(), nil)
 		return
 	}
-	if len(body.Username) < 3 || len(body.Password) < 12 {
+	if len(body.Username) < 3 {
 		writeErr(w, r, http.StatusBadRequest, "CONFIG_INVALID",
-			"username min 3 chars, password min 12 chars", nil)
+			"username min 3 chars", nil)
+		return
+	}
+	if fails := auth.ValidatePasswordDefault(body.Password); len(fails) > 0 {
+		writeErr(w, r, http.StatusBadRequest, "PASSWORD_POLICY",
+			"password policy: "+strings.Join(fails, "; "), nil)
 		return
 	}
 	hash, err := auth.HashPassword(body.Password, auth.DefaultArgonParams())

@@ -103,8 +103,8 @@ func createAdminIn(db *database.DB) error {
 	if password == "" {
 		return fmt.Errorf("set FYRWALL_ADMIN_PASSWORD in the environment; never pass passwords on the command line")
 	}
-	if len(password) < 12 {
-		return fmt.Errorf("password must be at least 12 characters")
+	if fails := auth.ValidatePasswordDefault(password); len(fails) > 0 {
+		return fmt.Errorf("admin password policy: %s", strings.Join(fails, "; "))
 	}
 	hash, err := hashPassword(password)
 	if err != nil {

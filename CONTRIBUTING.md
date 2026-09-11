@@ -32,10 +32,12 @@ extra careful with changes, so please read this guide.
   `internal/auth`, `internal/firewall/manager.go`, or `internal/secureconfig`
 - CI must be green: Docker tests, 7-arch compile matrix, frontend build
 
-## Reporting vulnerabilities
+## Reporting issues
 
-See [SECURITY.md](SECURITY.md) - never open public issues for
-vulnerabilities.
+Use [GitHub Issues](https://github.com/PotenFYR-Studios/FYRwall/issues) for
+bugs and feature requests. For security-sensitive reports, please mark the
+issue title with `[security]` and avoid posting exploit details until a fix
+lands.
 
 ## License
 
