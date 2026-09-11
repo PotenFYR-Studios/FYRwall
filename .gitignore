@@ -91,3 +91,8 @@ test/results/
 test/output/
 playwright-report/
 test-results/
+
+# Local agent/assistant artifacts (do not commit)
+CLAUDE.md
+.rtk
+.plan
