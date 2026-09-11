@@ -1,0 +1,35 @@
+[Unit]
+Description=FYRwall firewall management server
+Documentation=https://github.com/PotenFYR-Studios/FYRwall
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=fyrwall
+Group=fyrwall
+ExecStart=/usr/bin/fyrwall server --config /etc/fyrwall/config.yaml
+Restart=on-failure
+RestartSec=5
+
+# Hardening (spec section 75). Directives unsupported by older systemd
+# are ignored gracefully on those distributions.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+RestrictRealtime=true
+RestrictNamespaces=true
+SystemCallArchitectures=native
+CapabilityBoundingSet=
+AmbientCapabilities=
+ReadWritePaths=/var/lib/fyrwall /var/log/fyrwall /run/fyrwall
+
+[Install]
+WantedBy=multi-user.target

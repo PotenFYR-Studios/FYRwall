@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [main, beta]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Tests (Docker)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build test image
+        run: docker build -f Dockerfile.test -t fyrwall-test:latest .
+      - name: Run test suite in container (offline, read-only)
+        run: |
+          docker run --rm --network=none --read-only \
+            --tmpfs /tmp:rw,exec,size=1024m \
+            --cap-drop=ALL --security-opt no-new-privileges \
+            -e GOPROXY=off -e GOCACHE=/tmp/go-cache \
+            -v "$PWD":/src:ro fyrwall-test:latest \
+            go test -count=1 -v ./...
+
+  arch-matrix:
+    name: Cross-compile (${{ matrix.arch }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [amd64, arm64, arm, 386, ppc64le, s390x, riscv64]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+      - name: Build linux/${{ matrix.arch }}
+        run: GOOS=linux GOARCH=${{ matrix.arch }} CGO_ENABLED=0 go build -trimpath -o /dev/null ./cmd/fyrwall
+      - name: Vet linux/${{ matrix.arch }}
+        run: GOOS=linux GOARCH=${{ matrix.arch }} CGO_ENABLED=0 go vet ./...
+
+  frontend:
+    name: Frontend (bun)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: cd web && bun install --frozen-lockfile && bun run build
+      - run: cd docs/website && bun install --frozen-lockfile && bun run build

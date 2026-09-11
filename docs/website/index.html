@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FYRwall - Open Source Linux Firewall Manager | UFW &amp; iptables Web GUI</title>
+    <meta name="description" content="FYRwall is a free, open-source, self-hosted web GUI for UFW and iptables. Safe firewall management with rollback, restore points, RBAC, agent fleet support and conflict detection. Runs on any Linux distro." />
+    <meta name="keywords" content="ufw web gui, iptables web interface, linux firewall manager, open source firewall dashboard, self-hosted firewall gui, ufw alternative, firewall orchestration, debian firewall manager, ubuntu firewall web ui" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    <meta name="author" content="PotenFYR Studios" />
+    <link rel="canonical" href="https://potenfyr-studios.github.io/FYRwall/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="FYRwall" />
+    <meta property="og:title" content="FYRwall - Open Source Linux Firewall Manager" />
+    <meta property="og:description" content="Safe web GUI for UFW and iptables with rollback, restore points, RBAC and fleet agents. Free and self-hosted." />
+    <meta property="og:url" content="https://potenfyr-studios.github.io/FYRwall/" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="FYRwall - Open Source Linux Firewall Manager" />
+    <meta name="twitter:description" content="Safe web GUI for UFW and iptables with rollback, restore points, RBAC and fleet agents." />
+    <meta name="theme-color" content="#0a0a0a" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "FYRwall",
+      "applicationCategory": "SecurityApplication",
+      "operatingSystem": "Linux",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "description": "Open-source web-based firewall management for UFW and iptables with transactional rollback, restore points, RBAC and multi-host agents.",
+      "author": { "@type": "Organization", "name": "PotenFYR Studios" },
+      "softwareVersion": "0.1.0",
+      "license": "https://github.com/PotenFYR-Studios/FYRwall/blob/main/LICENSE"
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Is FYRwall free?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Yes. FYRwall is open source under Apache-2.0 with Commons Clause: free to use, self-host and modify." }
+        },
+        {
+          "@type": "Question",
+          "name": "Does FYRwall run the web server as root?",
+          "acceptedAnswer": { "@type": "Answer", "text": "No. The server runs unprivileged and only a tiny typed Unix-socket helper performs privileged firewall operations." }
+        },
+        {
+          "@type": "Question",
+          "name": "Which Linux distributions are supported?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Any distro with Go-compatible binaries: Debian, Ubuntu, RHEL/Rocky/Alma, Fedora, SUSE, Arch, Alpine and more, on amd64, arm64, arm, 386, ppc64le, s390x and riscv64." }
+        },
+        {
+          "@type": "Question",
+          "name": "Can FYRwall lock me out of my server?",
+          "acceptedAnswer": { "@type": "Answer", "text": "It actively prevents that: lockout-risk conflicts block applies, and every change has an automatic restore point with verification and rollback." }
+        }
+      ]
+    }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

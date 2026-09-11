@@ -1,0 +1,68 @@
+name: Release
+
+# Auto build on version tag: builds all architectures, generates
+# checksums + changelog, and publishes a GitHub Release.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Build frontend + docs site
+        run: |
+          cd web && bun install --frozen-lockfile && bun run build
+          cd ../docs/website && bun install --frozen-lockfile && bun run build
+
+      - name: Sync embedded assets
+        run: |
+          rm -rf webembed/dist && mkdir -p webembed/dist
+          cp -r web/dist/* webembed/dist/
+
+      - name: Build release artifacts (all architectures)
+        env:
+          VERSION: ${{ github.ref_name }}
+        run: ./scripts/cross-build.sh
+
+      - name: Generate changelog for this tag
+        id: changelog
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          # Prefer the CHANGELOG.md section; fall back to commit log.
+          awk "/^## \\[$TAG\\]/{flag=1;next}/^## \\[/{flag=0}flag" CHANGELOG.md > /tmp/notes.md || true
+          if [ ! -s /tmp/notes.md ]; then
+            PREV=$(git describe --tags --abbrev=0 "${GITHUB_REF}^" 2>/dev/null || echo "")
+            git log --no-merges --pretty="- %s (%h)" ${PREV:+$PREV..}$GITHUB_REF > /tmp/notes.md
+          fi
+          {
+            echo "## FYRwall $GITHUB_REF_NAME"
+            echo
+            cat /tmp/notes.md
+            echo
+            echo "### Checksums"
+            echo '```'
+            cat dist/SHA256SUMS
+            echo '```'
+          } > release-notes.md
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: release-notes.md
+          files: |
+            dist/*.tar.gz
+            dist/SHA256SUMS

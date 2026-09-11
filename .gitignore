@@ -1,0 +1,95 @@
+# ---------- Internal build instructions (never public) ----------
+HERMES_PROMPT.md
+
+# ---------- Go ----------
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+!Dockerfile.test
+*.out
+/vendor/
+
+# Compiled binaries (build outputs go to dist/)
+/fyrwall
+/fyrwall-agent
+/fyrwall-agent-privd
+fyrwall
+dist/
+
+# Go tooling artifacts
+*.prof
+*.pprof
+coverage.txt
+coverage.html
+
+# ---------- Frontend (web + docs site) ----------
+web/node_modules/
+web/dist/
+web/.vite/
+web/bun.lockb.bak
+docs/website/node_modules/
+docs/website/dist/
+docs/website/.vite/
+
+# Embedded assets: build outputs are synced in, but keep the folder tracked
+webembed/dist/
+webembed/dist/*
+!webembed/dist/.gitkeep
+
+# ---------- Environment and secrets (NEVER commit) ----------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+config.key
+integrity.key
+agent-log.key
+secrets/
+
+# ---------- Databases (local dev / runtime) ----------
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+
+# ---------- Packaging and release artifacts ----------
+packaging/_output/
+*.deb
+*.rpm
+*.apk
+*.tar.gz
+*.sha256
+!packaging/**/*.sha256
+
+# ---------- Logs and runtime state ----------
+*.log
+logs/
+run/
+*.pid
+
+# ---------- Editor / IDE ----------
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-*
+
+# ---------- OS ----------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---------- Test and coverage artifacts ----------
+test/results/
+test/output/
+playwright-report/
+test-results/

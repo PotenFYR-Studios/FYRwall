@@ -1,0 +1,109 @@
+name: Docker
+
+# Container publishing with two modes:
+#  1. Same version, new commits (push to main): rebuilds the image and
+#     refreshes the existing vX.Y.Z + rolling tags and appends a commit
+#     line to the release changelog. No new release.
+#  2. Version bump (v* tag): full release - new GitHub Release with
+#     changelog, tarballs, and :vX.Y.Z image tag on top of rolling tags.
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE: ghcr.io/${{ github.repository }}
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: docker/setup-qemu-action@v3
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Determine version and mode
+        id: ver
+        run: |
+          VERSION=$(cat VERSION 2>/dev/null || echo 0.1.0)
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            echo "mode=release" >> "$GITHUB_OUTPUT"
+            VERSION="${GITHUB_REF#v}"
+            echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          else
+            echo "mode=same-version" >> "$GITHUB_OUTPUT"
+            echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          fi
+          echo "sha=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE }}
+          tags: |
+            # rolling tags refreshed on every build
+            type=raw,value=latest
+            type=raw,value=${{ steps.ver.outputs.version }}
+            type=sha,prefix=,format=short
+            # full tag only on version-bump releases
+            type=raw,value=v${{ steps.ver.outputs.version }},enable=${{ steps.ver.outputs.mode == 'release' }}
+
+      - name: Build and push (amd64 + arm64)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            VERSION=${{ steps.ver.outputs.version }}
+            COMMIT=${{ steps.ver.outputs.sha }}
+
+      - name: Update release assets (same-version refresh)
+        if: steps.ver.outputs.mode == 'same-version'
+        run: |
+          # Same version: no new release. Append a build line to the changelog
+          # file so the release notes stay current; existing release untouched.
+          {
+            echo ""
+            echo "### Container build \`${{ steps.ver.outputs.sha }}\` ($(date -u +%Y-%m-%dT%H:%M:%SZ))"
+            echo "Image: \`${{ env.IMAGE }}:${{ steps.ver.outputs.version }}\`"
+          } >> CHANGELOG.md
+          echo "container build refreshed for existing version ${{ steps.ver.outputs.version }}"
+
+      - name: Attach images to release (version bump)
+        if: steps.ver.outputs.mode == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          generate_release_notes: true
+          body: |
+            ## Container images
+
+            ```
+            docker pull ${{ env.IMAGE }}:${{ steps.ver.outputs.version }}
+            docker pull ${{ env.IMAGE }}:latest
+            ```
+
+            Multi-arch: linux/amd64, linux/arm64

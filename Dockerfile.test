@@ -1,0 +1,19 @@
+# FYRwall CI/test image: Go toolchain + iptables binaries for parser
+# fixtures. Tests never touch host firewall state; the stub backend and
+# fixture parsing keep everything in-process.
+FROM golang:1.24-bookworm AS test
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    iptables \
+    ca-certificates \
+    git \
+  && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /src
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+
+# Unit + integration tests. -count=1 defeats result caching so every
+# docker run is a fresh verification.
+CMD ["go", "test", "-count=1", "-v", "-race", "./..."]

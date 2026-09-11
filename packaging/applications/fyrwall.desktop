@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=FYRwall
+GenericName=Firewall Manager
+Comment=Safe web GUI for UFW and iptables
+Exec=fyrwall tray
+Icon=fyrwall
+Terminal=false
+Categories=System;Security;Network;
+Keywords=firewall;ufw;iptables;security;
+StartupNotify=true

@@ -1,0 +1,50 @@
+# FYRwall compose deployment: central server + host agent bridged over a
+# shared Unix socket volume so the containerized server can reach the
+# host's firewall through the host-installed agent.
+#
+#   docker compose up -d          # start server
+#   Web UI: http://127.0.0.1:7443
+#
+# Agent connectivity from OTHER hosts: each managed host installs the
+# agent natively (install.sh) or as a container with host network + caps
+# (see docs/content/docker.md). Agents always dial OUT to the server on
+# port 7443/agent - no inbound ports on managed hosts.
+services:
+  server:
+    build: .
+    image: fyrwall:latest
+    container_name: fyrwall-server
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:7443:7443"   # bind to loopback or an explicit interface
+    volumes:
+      - fyrwall-data:/var/lib/fyrwall
+      - fyrwall-logs:/var/log/fyrwall
+      - fyrwall-run:/run/fyrwall
+    environment:
+      FYRWALL_DB_SQLITE_PATH: /var/lib/fyrwall/fyrwall.db
+      # FYRWALL_DOMAIN: fw.example.com        # domain binding (optional)
+
+  # Host firewall agent. Uses the HOST's network namespace and NET_ADMIN
+  # so it reads/mutates the real host firewall, exposing only the typed
+  # Unix socket to the server container.
+  agent:
+    image: fyrwall:latest
+    container_name: fyrwall-agent
+    restart: unless-stopped
+    user: root
+    pid: "host"
+    network_mode: host
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    command: ["agent", "--config", "/etc/fyrwall/config.yaml"]
+    volumes:
+      - fyrwall-run:/run/fyrwall
+      - fyrwall-data:/var/lib/fyrwall
+      - /etc/fyrwall:/etc/fyrwall:ro
+
+volumes:
+  fyrwall-data:
+  fyrwall-logs:
+  fyrwall-run:

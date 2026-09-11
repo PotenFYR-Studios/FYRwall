@@ -1,0 +1,43 @@
+# FYRwall default configuration.
+# Place at /etc/fyrwall/config.yaml. Every key is optional; values below
+# are the defaults. FYRWALL_* environment variables override this file.
+
+server:
+  bind: "127.0.0.1"      # loopback by default; non-loopback without TLS is refused
+  port: 7443
+  public_url: ""
+  trusted_proxies: []    # only list proxies you control
+
+tls:
+  enabled: false
+  cert_file: ""
+  key_file: ""
+
+database:
+  driver: "sqlite"       # sqlite | postgres
+  sqlite_path: "/var/lib/fyrwall/fyrwall.db"
+  postgres_dsn: ""
+
+firewall:
+  backend: "auto"                        # auto | ufw | iptables
+  safe_apply_timeout_seconds: 60
+  allow_write_on_manager_conflict: false # explicit acknowledgment only
+
+service:
+  autostart: true
+
+logging:
+  level: "info"          # debug | info | warn | error | fatal
+  format: "json"         # json | console
+  file_enabled: true
+  file_path: "/var/log/fyrwall/fyrwall.log"
+
+restore_points:
+  auto_enabled: true
+  retain_automatic: 50
+  retain_manual: 20
+  retention_days: 365
+
+security:
+  session_idle_timeout_minutes: 30
+  login_rate_limit_per_minute: 5

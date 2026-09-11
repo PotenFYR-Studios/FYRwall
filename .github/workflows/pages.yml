@@ -1,0 +1,59 @@
+name: Deploy docs site to GitHub Pages
+
+# Hybrid hosting model:
+# - If the repo has Pages configured with a custom domain (CNAME), the
+#   site is served at https://<your-domain>/ automatically.
+# - Otherwise it defaults to https://potenfyr-studios.github.io/FYRwall/
+# The build uses a relative base and a CNAME file only when the secret
+# is present, so one artifact serves both.
+
+on:
+  push:
+    branches: [main]
+    paths: ["docs/website/**", "docs/content/**", ".github/workflows/pages.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - name: Configure Pages (detects custom domain from repo settings)
+        id: pages
+        uses: actions/configure-pages@v5
+      - name: Build docs site
+        working-directory: docs/website
+        run: |
+          bun install --frozen-lockfile
+          # Hybrid base: custom domain -> root path; otherwise /FYRwall/
+          if [ -n "${{ steps.pages.outputs.base_url }}" ] && \
+             ! "${{ steps.pages.outputs.base_url }}" = *"github.io"*; then
+            export VITE_BASE="/"
+          else
+            export VITE_BASE="/FYRwall/"
+          fi
+          bun run build
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/website/dist
+
+  deploy:
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
