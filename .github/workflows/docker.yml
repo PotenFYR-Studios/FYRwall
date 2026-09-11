@@ -8,7 +8,7 @@ name: Docker
 #     changelog, tarballs, and :vX.Y.Z image tag on top of rolling tags.
 on:
   push:
-    branches: [main]
+    branches: [master]
     tags: ["v*"]
   workflow_dispatch:
 

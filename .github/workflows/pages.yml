@@ -9,7 +9,7 @@ name: Deploy docs site to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches: [master]
     paths: ["docs/website/**", "docs/content/**", ".github/workflows/pages.yml"]
   workflow_dispatch:
 
