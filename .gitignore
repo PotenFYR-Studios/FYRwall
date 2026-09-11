@@ -16,8 +16,7 @@ HERMES_PROMPT.md
 /fyrwall
 /fyrwall-agent
 /fyrwall-agent-privd
-fyrwall
-dist/
+/dist/
 
 # Go tooling artifacts
 *.prof
@@ -35,7 +34,6 @@ docs/website/dist/
 docs/website/.vite/
 
 # Embedded assets: build outputs are synced in, but keep the folder tracked
-webembed/dist/
 webembed/dist/*
 !webembed/dist/.gitkeep
 

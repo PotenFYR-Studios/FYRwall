@@ -22,8 +22,12 @@ concurrency:
   group: pages
   cancel-in-progress: false
 
+# GitHub Pages is unavailable for private repos on plans without Pages
+# support (configure-pages returns 404). Skip cleanly until the repo is
+# public; the workflow works as-is once that happens.
 jobs:
   build:
+    if: github.event.repository.private != true
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
