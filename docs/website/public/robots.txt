@@ -11,4 +11,4 @@ Allow: /
 User-agent: PerplexityBot
 Allow: /
 
-Sitemap: https://potenfyr-studios.github.io/FYRwall/sitemap.xml
+Sitemap: https://fyrwall.docs.potenfyr.in/sitemap.xml

@@ -68,7 +68,7 @@ export default function Home() {
             <div className="inline-block relative rounded-lg">
               <BorderBeam color="#f97316" />
               <code className="relative block bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-sm text-orange-300">
-                curl -fsSL https://potenfyr-studios.github.io/FYRwall/install.sh | sudo sh
+                curl -fsSL https://fyrwall.docs.potenfyr.in/install.sh | sudo sh
               </code>
             </div>
           </div>

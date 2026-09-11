@@ -131,6 +131,13 @@ export default function Doc({
       .catch(() => setContent("# Not found\n\nThis document does not exist yet."));
     window.scrollTo(0, 0);
   }, [slug]);
+  // Route-specific title for browser history, tabs and JS-rendering crawlers.
+  useEffect(() => {
+    const label = docs.find((d) => d.slug === slug)?.label;
+    document.title = label
+      ? `${label} | FYRwall Documentation`
+      : "FYRwall - Open Source Linux Firewall Manager | UFW & iptables Web GUI";
+  }, [slug, docs]);
 
   return (
     <div className="grid md:grid-cols-[220px_1fr] gap-8">

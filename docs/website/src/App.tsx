@@ -58,7 +58,10 @@ export default function App() {
         </Routes>
       </main>
       <footer className="border-t border-zinc-900 p-6 text-center text-sm text-zinc-600">
-        Apache-2.0 with Commons Clause - Built by PotenFYR Studios
+        Apache-2.0 with Commons Clause · Built by PotenFYR Studios ·{" "}
+        <a href="https://potenfyr.in" className="hover:text-orange-400" rel="noopener noreferrer">
+          potenfyr.in
+        </a>
       </footer>
     </div>
   );

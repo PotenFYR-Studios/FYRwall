@@ -2,11 +2,11 @@
 
 ## One-liner (recommended)
 
-    curl -fsSL https://potenfyr-studios.github.io/FYRwall/install.sh | sudo sh
+    curl -fsSL https://fyrwall.docs.potenfyr.in/install.sh | sudo sh
 
 Review-first (safer):
 
-    curl -fsSLo install-fyrwall.sh https://potenfyr-studios.github.io/FYRwall/install.sh
+    curl -fsSLo install-fyrwall.sh https://fyrwall.docs.potenfyr.in/install.sh
     less install-fyrwall.sh
     sudo sh install-fyrwall.sh
 
