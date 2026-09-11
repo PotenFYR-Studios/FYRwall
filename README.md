@@ -9,7 +9,7 @@
 [![Docker](https://img.shields.io/badge/ghcr.io-fyrwall-2496ED?style=for-the-badge&logo=docker&logoColor=white&labelColor=1c1e26)](https://github.com/PotenFYR-Studios/FYRwall/pkgs/container/fyrwall)
 [![Docs](https://img.shields.io/badge/Docs-potenfyr--studios.github.io-8b5cf6?style=for-the-badge&logo=readme&labelColor=1c1e26)](https://potenfyr-studios.github.io/FYRwall/)
 [![License](https://img.shields.io/badge/License-Apache--2.0%20WITH%20Commons%20Clause-2ea043?style=for-the-badge&labelColor=1c1e26)](LICENSE)
-[![Profile views](https://komarev.com/ghpvc/?username=PotenFYR-Studios&color=ec4899&style=for-the-badge&label=VIEWS&labelColor=1c1e26)](https://github.com/PotenFYR-Studios)
+[![Profile views](https://komarev.com/ghpvc/?username=PotenFYR-Studios&repo=FYRwall&color=ec4899&style=for-the-badge&label=FYRWALL+VIEWS&labelColor=1c1e26)](https://github.com/PotenFYR-Studios/FYRwall)
 
 [Overview](#overview) · [Install](#install) · [Docker](#docker) · [Docs](https://potenfyr-studios.github.io/FYRwall/) · [Extensions](#extensions) · [FAQ](#faq) · [Releases](https://github.com/PotenFYR-Studios/FYRwall/releases)
 
@@ -397,8 +397,6 @@ Desktop Linux with a tray registers a status icon with: Open Web UI, Restart ser
 
 Uninstall with zero leftovers:
 
-Uninstall with zero leftovers:
-
 ```bash
 sudo sh packaging/uninstall.sh --all           # keeps config + restore points (asks)
 sudo sh packaging/uninstall.sh --all --purge   # removes everything incl. service user
@@ -424,7 +422,36 @@ Full documentation lives at [potenfyr-studios.github.io/FYRwall](https://potenfy
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=PotenFYR-Studios/FYRwall&type=Date)](https://star-history.com/#PotenFYR-Studios/FYRwall&Date)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=PotenFYR-Studios/FYRwall&type=Timeline&theme=dark" />
+  <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=PotenFYR-Studios/FYRwall&type=Timeline" />
+  <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=PotenFYR-Studios/FYRwall&type=Timeline" width="100%" />
+</picture>
+
+---
+
+## Contributing
+
+Contributions make the open-source community such an amazing place to learn, inspire and create. Any contributions you make are **greatly appreciated** - see [CONTRIBUTING.md](CONTRIBUTING.md) and the [good first issues](https://github.com/PotenFYR-Studios/FYRwall/labels/good%20first%20issue).
+
+<a href="https://github.com/PotenFYR-Studios/FYRwall/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=PotenFYR-Studios/FYRwall" alt="FYRwall contributors" />
+</a>
+
+<br/>
+
+<a href="https://github.com/PotenFYR-Studios/FYRwall/stargazers">
+  <img src="https://reporoster.com/stars/PotenFYR-Studios/FYRwall" alt="Star over time" width="220"/>
+</a>
+<a href="https://github.com/PotenFYR-Studios/FYRwall/network/members">
+  <img src="https://reporoster.com/forks/PotenFYR-Studios/FYRwall" alt="Fork over time" width="220"/>
+</a>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/PotenFYR-Studios/FYRwall/output/github-snake-dark.svg" />
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/PotenFYR-Studios/FYRwall/output/github-snake.svg" />
+  <img alt="Contribution snake animation" src="https://raw.githubusercontent.com/PotenFYR-Studios/FYRwall/output/github-snake.svg" width="100%" />
+</picture>
 
 ---
 

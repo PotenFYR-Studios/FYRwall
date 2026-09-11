@@ -4,9 +4,11 @@ import Doc from "./pages/Doc";
 
 const docs = [
   { slug: "installation", label: "Installation" },
+  { slug: "docker", label: "Docker" },
   { slug: "operation", label: "Operation" },
   { slug: "security", label: "Security" },
   { slug: "architecture", label: "Architecture" },
+  { slug: "extensions-guide", label: "Extensions Guide" },
   { slug: "extensions", label: "Extensions" },
   { slug: "updating", label: "Updating" },
   { slug: "troubleshooting", label: "Troubleshooting" },
@@ -17,20 +19,28 @@ const docs = [
 export default function App() {
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
-      <header className="border-b border-zinc-800 px-6 py-4 flex items-center gap-8">
-        <a href="#/" className="font-bold text-orange-500 text-xl">FYRwall</a>
+      <header className="border-b border-zinc-800 px-6 py-4 flex items-center gap-8 sticky top-0 bg-zinc-950/90 backdrop-blur z-10">
+        <a href="#/" className="font-bold text-orange-500 text-xl">
+          FYRwall
+        </a>
         <nav className="flex gap-4 flex-wrap">
-          {docs.map((d) => (
-            <NavLink
-              key={d.slug}
-              to={`/docs/${d.slug}`}
-              className={({ isActive }) =>
-                `text-sm ${isActive ? "text-orange-400" : "text-zinc-400 hover:text-white"}`
-              }
-            >
-              {d.label}
-            </NavLink>
-          ))}
+          <NavLink
+            to="/"
+            className={({ isActive }) =>
+              `text-sm ${isActive ? "text-orange-400" : "text-zinc-400 hover:text-white"}`
+            }
+            end
+          >
+            Home
+          </NavLink>
+          <NavLink
+            to="/docs/installation"
+            className={({ isActive }) =>
+              `text-sm ${isActive ? "text-orange-400" : "text-zinc-400 hover:text-white"}`
+            }
+          >
+            Docs
+          </NavLink>
         </nav>
         <a
           href="https://github.com/PotenFYR-Studios/FYRwall"
@@ -40,9 +50,10 @@ export default function App() {
           GitHub
         </a>
       </header>
-      <main className="p-6 max-w-4xl mx-auto">
+      <main className="p-6 max-w-5xl mx-auto">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/docs" element={<Doc docs={docs} slugOverride="installation" />} />
           <Route path="/docs/:slug" element={<Doc docs={docs} />} />
         </Routes>
       </main>

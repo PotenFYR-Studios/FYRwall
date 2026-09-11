@@ -1,0 +1,39 @@
+name: Generate Snake
+
+# Animates the contribution graph as a snake eating commits, published to
+# the output branch for embedding in the README (dark + light variants).
+
+on:
+  schedule:
+    - cron: "31 18 * * *" # daily, ~00:01 IST
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: Platane/snk/svg-only@v3
+        with:
+          github_user_name: PotenFYR-Studios
+          outputs: |
+            dist/github-snake.svg
+            dist/github-snake-dark.svg?palette=github-dark
+
+      - name: Push to output branch
+        run: |
+          git clone --single-branch --branch output "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" output-repo 2>/dev/null || (
+            git checkout --orphan output && git rm -rf . && cp dist/github-snake* . &&
+            git add . && git commit -m "snake: initial" && git push origin output && exit 0
+          )
+          cp dist/github-snake.svg dist/github-snake-dark.svg output-repo/
+          cd output-repo
+          git add .
+          git -c user.name=github-actions -c user.email=actions@github.com commit -m "snake: update" || echo "no changes"
+          git push
