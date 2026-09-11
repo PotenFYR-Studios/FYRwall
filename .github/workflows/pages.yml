@@ -40,12 +40,11 @@ jobs:
         run: |
           bun install --frozen-lockfile
           # Hybrid base: custom domain -> root path; otherwise /FYRwall/
-          if [ -n "${{ steps.pages.outputs.base_url }}" ] && \
-             ! "${{ steps.pages.outputs.base_url }}" = *"github.io"*; then
-            export VITE_BASE="/"
-          else
-            export VITE_BASE="/FYRwall/"
-          fi
+          BASE_URL="${{ steps.pages.outputs.base_url }}"
+          case "$BASE_URL" in
+            ""|*github.io*) export VITE_BASE="/FYRwall/" ;;
+            *) export VITE_BASE="/" ;;
+          esac
           bun run build
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
