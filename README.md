@@ -418,13 +418,15 @@ Matrix covers Debian (bookworm, bullseye), Ubuntu, Alpine (musl), Fedora, Rocky,
 
 Full documentation lives at [fyrwall.docs.potenfyr.in](https://fyrwall.docs.potenfyr.in/) with installation, configuration, operation, security model, architecture, safety and restore points, extension development, updating and troubleshooting guides. Built with Vite + React + TypeScript via bun; every route is prerendered to real HTML with per-route titles, canonical URLs, Open Graph and JSON-LD structured data (sitemap, robots included). The github.io path keeps working as a redirect.
 
-## Star History
+## ⭐ Star History
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=PotenFYR-Studios/FYRwall&type=Timeline&theme=dark" />
-  <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=PotenFYR-Studios/FYRwall&type=Timeline" />
-  <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=PotenFYR-Studios/FYRwall&type=Timeline" width="100%" />
+  <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=potenfyr-studios/authcore,potenfyr-studios/statfyr,potenfyr-studios/discord-botlists,potenfyr-studios/vigilfyr,potenfyr-studios/shell-eggs,potenfyr-studios/prog-language-eggs,potenfyr-studios/minecraft-eggs,potenfyr-studios/database-eggs,potenfyr-studios/apicordon,potenfyr-studios/ojaj,potenfyr-studios/fyrwall,potenfyr-studios/echoingdeaths&type=Date&theme=dark" />
+  <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=potenfyr-studios/authcore,potenfyr-studios/statfyr,potenfyr-studios/discord-botlists,potenfyr-studios/vigilfyr,potenfyr-studios/shell-eggs,potenfyr-studios/prog-language-eggs,potenfyr-studios/minecraft-eggs,potenfyr-studios/database-eggs,potenfyr-studios/apicordon,potenfyr-studios/ojaj,potenfyr-studios/fyrwall,potenfyr-studios/echoingdeaths&type=Date" />
+  <img alt="Star history chart for all PotenFYR Studios public repositories" src="https://api.star-history.com/svg?repos=potenfyr-studios/authcore,potenfyr-studios/statfyr,potenfyr-studios/discord-botlists,potenfyr-studios/vigilfyr,potenfyr-studios/shell-eggs,potenfyr-studios/prog-language-eggs,potenfyr-studios/minecraft-eggs,potenfyr-studios/database-eggs,potenfyr-studios/apicordon,potenfyr-studios/ojaj,potenfyr-studios/fyrwall,potenfyr-studios/echoingdeaths&type=Date" width="80%" />
 </picture>
+
+Every public PotenFYR Studios repository on one live chart, served by [star-history.com](https://star-history.com).
 
 ---
 
@@ -435,14 +437,11 @@ Contributions make the open-source community such an amazing place to learn, ins
 <a href="https://github.com/PotenFYR-Studios/FYRwall/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=PotenFYR-Studios/FYRwall" alt="FYRwall contributors" />
 </a>
-
-<br/>
-
 <a href="https://github.com/PotenFYR-Studios/FYRwall/stargazers">
-  <img src="https://reporoster.com/stars/PotenFYR-Studios/FYRwall" alt="Star over time" width="220"/>
+  <img src="https://img.shields.io/github/stars/PotenFYR-Studios/FYRwall?style=social&label=Stars" alt="Live star count" />
 </a>
 <a href="https://github.com/PotenFYR-Studios/FYRwall/network/members">
-  <img src="https://reporoster.com/forks/PotenFYR-Studios/FYRwall" alt="Fork over time" width="220"/>
+  <img src="https://img.shields.io/github/forks/PotenFYR-Studios/FYRwall?style=social&label=Forks" alt="Live fork count" />
 </a>
 
 <picture>
