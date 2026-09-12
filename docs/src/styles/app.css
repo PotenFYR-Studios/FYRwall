@@ -412,13 +412,7 @@ pre:hover .copy-btn, .copy-btn:focus-visible { opacity: 1; }
   border-radius: 999px;
   background: #34d399;
   box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
-  animation: pulse-dot 2s ease-in-out infinite;
 }
-@keyframes pulse-dot {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.45; }
-}
-
 /* ---------- glass cards (SPEC 5.5) ---------- */
 
 .doc-card {
@@ -702,10 +696,7 @@ summary.side-title:hover {
   border-radius: 999px;
   filter: blur(140px);
   pointer-events: none;
-  animation: orb-pulse 3s ease-in-out infinite alternate;
 }
-@keyframes orb-pulse { from { opacity: 0.75; } to { opacity: 1; } }
-
 .meteor {
   position: absolute;
   top: -8%;

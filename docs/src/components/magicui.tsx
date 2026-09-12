@@ -84,41 +84,6 @@ export function Marquee({
   );
 }
 
-/** Magic UI - Border Beam: light beam travelling around a rounded border. */
-export function BorderBeam({
-  duration = 7,
-  colorFrom = "#8b5cf6",
-  colorTo = "#ec4899",
-  width = 2,
-}: {
-  duration?: number;
-  colorFrom?: string;
-  colorTo?: string;
-  width?: number;
-}) {
-  return (
-    <div
-      aria-hidden
-      className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]"
-    >
-      <style>{`@keyframes fyr-beam-rotate { to { transform: rotate(360deg); } }`}</style>
-      <div
-        className="absolute left-1/2 top-1/2"
-        style={{
-          width: 200,
-          aspectRatio: "1",
-          marginLeft: "-100px",
-          marginTop: "-100px",
-          background: `conic-gradient(from 0deg, transparent 0 330deg, ${colorFrom} 344deg, ${colorTo} 356deg, transparent 360deg)`,
-          mask: `radial-gradient(farthest-side, transparent calc(100% - ${width}px), #000 calc(100% - ${width}px))`,
-          WebkitMask: `radial-gradient(farthest-side, transparent calc(100% - ${width}px), #000 calc(100% - ${width}px))`,
-          animation: `fyr-beam-rotate ${duration}s linear infinite`,
-        }}
-      />
-    </div>
-  );
-}
-
 /** Magic UI - Magic Card: cursor spotlight that tracks the mouse. */
 export function MagicCard({
   children,

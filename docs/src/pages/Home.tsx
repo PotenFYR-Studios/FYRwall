@@ -12,7 +12,7 @@ import {
   ArrowUpRight,
   Terminal,
 } from "lucide-react";
-import { NumberTicker, Marquee, Meteors, GlowOrb, BorderBeam, MagicCard } from "../components/magicui";
+import { NumberTicker, Marquee, Meteors, GlowOrb, MagicCard } from "../components/magicui";
 import { CopyButton } from "../components/buttons";
 
 const INSTALL_CMD = "curl -fsSL https://fyrwall.docs.potenfyr.in/install.sh | sudo sh";
@@ -157,7 +157,6 @@ export default function Home() {
           </div>
           <div className="hero-in relative mx-auto mt-10 max-w-2xl" style={{ animationDelay: "0.32s" }}>
             <div className="relative rounded-xl border border-line-light bg-panel/80 p-1 shadow-[var(--shadow)] backdrop-blur">
-              <BorderBeam duration={8} colorFrom="#8b5cf6" colorTo="#f97316" />
               <div className="flex items-center gap-3 rounded-[10px] px-4 py-3">
                 <Terminal className="h-4 w-4 shrink-0 text-brand-orange" />
                 <code className="min-w-0 flex-1 overflow-x-auto whitespace-nowrap font-mono text-sm text-[#dfe2ef]">
@@ -251,7 +250,6 @@ export default function Home() {
 
         {/* pipeline */}
         <section className="relative mt-20 overflow-hidden rounded-2xl border border-line-light bg-white/[0.02] p-6 backdrop-blur">
-          <BorderBeam duration={9} colorFrom="#ec4899" colorTo="#8b5cf6" />
           <h2 className="text-center text-[1.15em] font-semibold text-white">
             Every firewall change walks the full pipeline
           </h2>
