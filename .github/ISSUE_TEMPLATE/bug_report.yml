@@ -1,0 +1,116 @@
+name: Bug report
+description: Something broke or behaves differently than documented.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug. Please fill in the details
+        below - the firewall backend and version matter a lot for reproduction.
+
+        Do NOT paste passwords, tokens, session cookies, agent keys or TLS
+        keys into this issue. Redact logs accordingly.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Also tell us what you expected to happen instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open ...
+        2. Click ...
+        3. See error
+    validations:
+      required: true
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      options:
+        - Web UI
+        - Server API
+        - Agent / host connection
+        - UFW backend
+        - iptables backend (legacy or nft)
+        - Restore points / rollback
+        - CLI (fyrwall)
+        - Install / packaging
+        - Docker
+        - Docs site
+        - Other / not sure
+    validations:
+      required: true
+  - type: dropdown
+    id: distro
+    attributes:
+      label: Distro
+      options:
+        - Debian
+        - Ubuntu
+        - Fedora
+        - RHEL / Rocky / Alma
+        - SUSE
+        - Arch
+        - Alpine
+        - Void
+        - Gentoo
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: arch
+    attributes:
+      label: Architecture
+      options:
+        - amd64
+        - arm64
+        - arm
+        - 386
+        - ppc64le
+        - s390x
+        - riscv64
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: FYRwall version
+      description: Output of `fyrwall version`.
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: dropdown
+    id: install
+    attributes:
+      label: Installation method
+      options:
+        - install.sh (curl one-liner)
+        - install.sh (downloaded and reviewed)
+        - Release tarball (manual)
+        - Docker
+        - Built from source
+    validations:
+      required: false
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: |
+        `sudo journalctl -u fyrwall-server -u fyrwall-agent --no-pager | tail -100`
+        Redact secrets. Attach files instead of pasting very large logs.
+    validations:
+      required: false
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I checked existing issues and did not find a duplicate.
+          required: true
+        - label: I redacted all secrets from logs and screenshots.
+          required: true

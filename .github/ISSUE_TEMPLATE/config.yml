@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question or idea
+    about: Questions and lightweight discussions belong on Discord, where you get answers faster.
+    url: https://discord.com/invite/zUaN2FPBec
+  - name: Documentation
+    about: Install, configuration, safety model and troubleshooting guides.
+    url: https://fyrwall.docs.potenfyr.in/
+  - name: Security vulnerability
+    about: Please use private vulnerability reporting, not public issues.
+    url: https://github.com/PotenFYR-Studios/FYRwall/security/advisories/new

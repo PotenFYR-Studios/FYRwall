@@ -1,25 +1,23 @@
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:8b5cf6,50:ec4899,100:f97316&height=220&section=header&text=FYRwall&fontSize=60&fontColor=ffffff&fontAlignY=34&desc=The%20safe%20way%20to%20manage%20Linux%20firewalls&descSize=20&descAlignY=55&animation=twinkling" width="100%" alt="FYRwall banner"/>
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:8b5cf6,50:ec4899,100:f97316&height=220&section=header&text=FYRwall&fontSize=52&fontColor=ffffff&fontAlignY=34&animation=twinkling" width="100%" alt="FYRwall banner"/>
 
-[![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=20&pause=1200&color=f97316&center=true&vCenter=true&width=760&lines=Transactional+firewall+changes+with+auto-rollback;Lockout+protection+built+in+%F0%9F%9B%A1%EF%B8%8F;UFW+%7C+iptables+%7C+nftables+-+one+GUI;Unprivileged+by+design.+No+shell.+No+root+UI.;7+architectures.+Every+distro.+Offline-first.)](https://github.com/PotenFYR-Studios/FYRwall)
+[![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=20&pause=1200&color=8B5CF6&center=true&vCenter=true&width=800&lines=Transactional+firewall+changes+with+auto-rollback;Lockout+protection+built+in+%F0%9F%9B%A1%EF%B8%8F;UFW+%7C+iptables+%7C+nftables+-+one+GUI;Unprivileged+by+design.+No+shell.+No+root+UI.)](https://github.com/PotenFYR-Studios/FYRwall)
 
-[![CI](https://img.shields.io/github/actions/workflow/status/PotenFYR-Studios/FYRwall/ci.yml?style=for-the-badge&logo=githubactions&label=CI&labelColor=1c1e26&color=2ea043)](https://github.com/PotenFYR-Studios/FYRwall/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/PotenFYR-Studios/FYRwall?style=for-the-badge&label=Release&color=orange&labelColor=1c1e26)](https://github.com/PotenFYR-Studios/FYRwall/releases)
+[![CI](https://img.shields.io/github/actions/workflow/status/PotenFYR-Studios/FYRwall/ci.yml?style=for-the-badge&logo=githubactions&logoColor=white&label=CI&labelColor=1c1e26&color=2ea043)](https://github.com/PotenFYR-Studios/FYRwall/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/PotenFYR-Studios/FYRwall?style=for-the-badge&logo=github&logoColor=white&label=Release&labelColor=1c1e26&color=eac54f)](https://github.com/PotenFYR-Studios/FYRwall/releases)
 [![Docker](https://img.shields.io/badge/ghcr.io-fyrwall-2496ED?style=for-the-badge&logo=docker&logoColor=white&labelColor=1c1e26)](https://github.com/PotenFYR-Studios/FYRwall/pkgs/container/fyrwall)
-[![Docs](https://img.shields.io/badge/Docs-potenfyr--studios.github.io-8b5cf6?style=for-the-badge&logo=readme&labelColor=1c1e26)](https://potenfyr-studios.github.io/FYRwall/)
-[![License](https://img.shields.io/badge/License-Apache--2.0%20WITH%20Commons%20Clause-2ea043?style=for-the-badge&labelColor=1c1e26)](LICENSE)
-[![Profile views](https://komarev.com/ghpvc/?username=PotenFYR-Studios&repo=FYRwall&color=ec4899&style=for-the-badge&label=FYRWALL+VIEWS&labelColor=1c1e26)](https://github.com/PotenFYR-Studios/FYRwall)
+[![Docs](https://img.shields.io/badge/Docs-fyrwall.docs.potenfyr.in-8b5cf6?style=for-the-badge&logo=readme&logoColor=white&labelColor=1c1e26)](https://fyrwall.docs.potenfyr.in/)
+[![License](https://img.shields.io/badge/License-Apache--2.0%20%2B%20Commons%20Clause-2ea043?style=for-the-badge&logo=apache&logoColor=white&labelColor=1c1e26)](https://github.com/PotenFYR-Studios/FYRwall/blob/master/LICENSE)
+[![Profile views](https://komarev.com/ghpvc/?username=PotenFYR-Studios-FYRwall&color=ec4899&style=for-the-badge&label=PROFILE+VIEWS&labelColor=1c1e26)](https://github.com/PotenFYR-Studios/FYRwall)
 
-[Overview](#overview) · [Install](#install) · [Docker](#docker) · [Docs](https://potenfyr-studios.github.io/FYRwall/) · [Extensions](#extensions) · [FAQ](#faq) · [Releases](https://github.com/PotenFYR-Studios/FYRwall/releases)
+[Overview](#overview) · [Install](#install) · [Docker](#docker) · [Docs](https://fyrwall.docs.potenfyr.in/) · [Extensions](#extensions) · [FAQ](#faq) · [Releases](https://github.com/PotenFYR-Studios/FYRwall/releases)
 
 ```bash
-curl -fsSL https://potenfyr-studios.github.io/FYRwall/install.sh | sudo sh
+curl -fsSL https://fyrwall.docs.potenfyr.in/install.sh | sudo sh
 ```
 
 </div>
-
----
 
 ---
 
@@ -343,9 +341,9 @@ Every update creates a database backup and firewall restore point first; config 
 
 | Event | What happens |
 |---|---|
-| push to `main` | CI test matrix + container image rebuild; existing release changelog gets a build line; rolling image tags refreshed |
+| push to `master` | CI test matrix + container image rebuild; existing release changelog gets a build line; rolling image tags refreshed |
 | version bump tag `vX.Y.Z` | Full release: new GitHub Release with changelog + 7-arch tarballs + SHA256SUMS + new `:vX.Y.Z` image tag |
-| push to `docs/website/**` | Docs site auto-deploys to GitHub Pages |
+| push to `docs/**` | Docs site auto-deploys to GitHub Pages |
 
 Same version, new commits = refreshed builds and changelog build-lines, no new release. Bumped version = new tag, new release, new image tag. Fully automatic.
 
@@ -418,7 +416,7 @@ Matrix covers Debian (bookworm, bullseye), Ubuntu, Alpine (musl), Fedora, Rocky,
 
 ## Docs site
 
-Full documentation lives at [potenfyr-studios.github.io/FYRwall](https://potenfyr-studios.github.io/FYRwall/) (auto-deployed to GitHub Pages, custom-domain friendly) with installation, operation, security model, architecture, extension development, updating and troubleshooting guides. Built with Vite + React + TypeScript via bun; SEO-ready with sitemap, robots, Open Graph and JSON-LD structured data.
+Full documentation lives at [fyrwall.docs.potenfyr.in](https://fyrwall.docs.potenfyr.in/) with installation, configuration, operation, security model, architecture, safety and restore points, extension development, updating and troubleshooting guides. Built with Vite + React + TypeScript via bun; every route is prerendered to real HTML with per-route titles, canonical URLs, Open Graph and JSON-LD structured data (sitemap, robots included). The github.io path keeps working as a redirect.
 
 ## Star History
 
@@ -432,7 +430,7 @@ Full documentation lives at [potenfyr-studios.github.io/FYRwall](https://potenfy
 
 ## Contributing
 
-Contributions make the open-source community such an amazing place to learn, inspire and create. Any contributions you make are **greatly appreciated** - see [CONTRIBUTING.md](CONTRIBUTING.md) and the [good first issues](https://github.com/PotenFYR-Studios/FYRwall/labels/good%20first%20issue).
+Contributions make the open-source community such an amazing place to learn, inspire and create. Any contributions you make are **greatly appreciated** - see [CONTRIBUTING.md](CONTRIBUTING.md) and the [good first issues](https://github.com/PotenFYR-Studios/FYRwall/labels/good%20first%20issue). Security concerns: please use [SECURITY.md](SECURITY.md) (private vulnerability reporting), not public issues.
 
 <a href="https://github.com/PotenFYR-Studios/FYRwall/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=PotenFYR-Studios/FYRwall" alt="FYRwall contributors" />
@@ -465,7 +463,7 @@ FYRwall is fully offline-capable: no CDN assets, no telemetry, no external calls
 
 ## License
 
-FYRwall is licensed under the **Apache License 2.0 WITH Commons Clause**.
+FYRwall is licensed under **Apache-2.0 with Commons Clause**.
 
 - Free to use, study, modify, self-host and redistribute
 - Commercial use is welcome: embedding FYRwall as a feature inside a
@@ -475,7 +473,9 @@ FYRwall is licensed under the **Apache License 2.0 WITH Commons Clause**.
   as a paid product (this includes managed-hosting-of-FYRwall alone)
 
 This matches the whole PotenFYR-Studios org: the tool stays open and
-auditable, and nobody gets to resell it as-is. See [LICENSE](LICENSE).
+auditable, and nobody gets to resell it as-is. The [LICENSE](LICENSE) file
+(https://github.com/PotenFYR-Studios/FYRwall/blob/master/LICENSE) is the
+authoritative legal text; this section is a plain-English summary.
 
 ### Restrictions at a glance
 
@@ -494,7 +494,7 @@ auditable, and nobody gets to resell it as-is. See [LICENSE](LICENSE).
 "Sell" here follows the Commons Clause definition: charging for a
 product or service whose value derives entirely or substantially from
 FYRwall itself. If FYRwall is a minor feature of something bigger, you
-are fine. Questions or a commercial exception: [contact the org](https://www.potenfyr.in/).
+are fine. Questions or a commercial exception: [contact the org](https://potenfyr.in/).
 
 ---
 
@@ -504,10 +504,13 @@ are fine. Questions or a commercial exception: [contact the org](https://www.pot
 
 ✨ **Safe by default** (every change snapshotted, verified, rolled back) · ⚡ **Fast** (single Go binary, embedded UI) · 🛡️ **Hardened** (unprivileged, encrypted config, tamper checks) · 🤝 **Community-driven** (extensions, open source)
 
-[![GitHub](https://img.shields.io/badge/GitHub-PotenFYR--Studios-181717?style=for-the-badge&logo=github&labelColor=1c1e26)](https://github.com/PotenFYR-Studios)
-[![Website](https://img.shields.io/badge/Website-potenfyr.in-8b5cf6?style=for-the-badge&logo=googlechrome&labelColor=1c1e26)](https://www.potenfyr.in/)
+[![GitHub](https://img.shields.io/badge/GitHub-PotenFYR--Studios-181717?style=for-the-badge&logo=github&logoColor=white&labelColor=1c1e26)](https://github.com/PotenFYR-Studios)
+[![Website](https://img.shields.io/badge/Website-potenfyr.in-8b5cf6?style=for-the-badge&logo=googlechrome&logoColor=white&labelColor=1c1e26)](https://potenfyr.in/)
 [![Community](https://img.shields.io/badge/Community-Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white&labelColor=1c1e26)](https://discord.com/invite/zUaN2FPBec)
-[![Docs](https://img.shields.io/badge/Docs-FYRwall-f97316?style=for-the-badge&logo=readme&labelColor=1c1e26)](https://potenfyr-studios.github.io/FYRwall/)
+[![Docs](https://img.shields.io/badge/Docs-fyrwall.docs.potenfyr.in-f97316?style=for-the-badge&logo=readme&logoColor=white&labelColor=1c1e26)](https://fyrwall.docs.potenfyr.in/)
+
+<!-- markdownlint-disable -->
+<div align="center">
 
 <img src="https://capsule-render.vercel.app/api?type=waving&color=0:f97316,50:ec4899,100:8b5cf6&height=120&section=footer&text=Made%20with%20%E2%9D%A4%EF%B8%8F%20by%20PotenFYR%20Studios&fontSize=22&fontColor=ffffff&animation=twinkling" width="100%" alt="footer"/>
 

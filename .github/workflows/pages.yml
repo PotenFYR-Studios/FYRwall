@@ -1,22 +1,20 @@
 name: Deploy docs site to GitHub Pages
 
 # Hybrid hosting model:
-# - If the repo has Pages configured with a custom domain (CNAME), the
-#   site is served at https://<your-domain>/ automatically.
-# - Otherwise it defaults to https://potenfyr-studios.github.io/FYRwall/
-# The build uses a relative base and a CNAME file only when the secret
-# is present, so one artifact serves both.
+# - The repo serves Pages from the custom domain fyrwall.docs.potenfyr.in
+#   (the CNAME file is shipped in docs/public/).
+# - If the domain is ever removed, configure-pages falls back to
+#   https://potenfyr-studios.github.io/FYRwall/ and the build switches to a
+#   relative base so the same artifact serves both hosts.
 
 on:
   push:
     branches: [master]
-    paths: ["docs/website/**", "docs/content/**", ".github/workflows/pages.yml"]
+    paths: ["docs/**", ".github/workflows/pages.yml"]
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
   group: pages
@@ -29,14 +27,16 @@ jobs:
   build:
     if: github.event.repository.private != true
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
       - name: Configure Pages (detects custom domain from repo settings)
         id: pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
       - name: Build docs site
-        working-directory: docs/website
+        working-directory: docs
         run: |
           bun install --frozen-lockfile
           # Hybrid base: custom domain -> root path; otherwise /FYRwall/
@@ -47,9 +47,9 @@ jobs:
           esac
           bun run build
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
-          path: docs/website/dist
+          path: docs/dist
 
   deploy:
     needs: build
@@ -57,6 +57,9 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

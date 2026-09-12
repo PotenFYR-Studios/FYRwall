@@ -1,0 +1,44 @@
+name: Feature request
+description: Suggest an idea for FYRwall.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Ideas welcome. The bar: FYRwall does one thing (firewall management)
+        safely - proposals that fit that focus are easiest to accept.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve
+      description: What are you trying to do, and what is missing or painful today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: What should happen instead? Concrete behavior beats abstract ideas.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Other approaches, tools, or workarounds you have tried.
+    validations:
+      required: false
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety check
+      options:
+        - label: This feature does not require running the web UI as root or weakening the transactional apply/rollback pipeline.
+          required: false
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I checked existing issues and did not find a duplicate.
+          required: true

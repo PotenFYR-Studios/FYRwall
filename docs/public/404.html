@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <title>Page not found | FYRwall Documentation</title>
+    <meta name="description" content="This FYRwall documentation page could not be found. Head to the FYRwall docs hub, the installation guide, or the PotenFYR Studios GitHub organization." />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/favicon.png" />
+    <meta name="theme-color" content="#0b0d14" />
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0b0d14;
+        --panel: #151828;
+        --panel-elevated: #1a1e32;
+        --line: rgba(139, 92, 246, 0.16);
+        --line-light: rgba(255, 255, 255, 0.08);
+        --violet: #8b5cf6;
+        --pink: #ec4899;
+        --orange: #f97316;
+        --text: #e8eaf2;
+        --text-2: #b9bfd4;
+        --muted: #9aa0b4;
+        --faint: #6a7089;
+        --grad-text: linear-gradient(120deg, #c4b5fd, #f9a8d4 50%, #fdba74);
+        --font: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+        --mono: "Fira Code", ui-monospace, SFMono-Regular, "Cascadia Code", Consolas, monospace;
+      }
+      * { box-sizing: border-box; }
+      html, body { background: var(--bg); }
+      body {
+        margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+        color: var(--text); font-family: var(--font);
+        padding: 24px; text-align: center; overflow-x: clip;
+      }
+      body::before {
+        content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+        background-image: radial-gradient(rgba(139, 92, 246, 0.22) 1px, transparent 1px);
+        background-size: 26px 26px;
+        -webkit-mask-image: radial-gradient(750px circle at 50% 0%, white, transparent 75%);
+        mask-image: radial-gradient(750px circle at 50% 0%, white, transparent 75%);
+      }
+      main { position: relative; z-index: 1; max-width: 36rem; }
+      .brand {
+        font-family: var(--mono); font-weight: 700; font-size: 1rem; text-decoration: none;
+        color: #fff; display: inline-flex; align-items: center; gap: 9px;
+      }
+      .brand-dot { background: var(--grad-text); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+      .eyebrow {
+        font-family: var(--mono); font-size: 0.72em; font-weight: 700; text-transform: uppercase;
+        letter-spacing: 0.15em; color: var(--faint); margin: 1.6rem 0 0;
+      }
+      h1 {
+        font-size: clamp(2.6rem, 6vw, 4rem); margin: 0.4rem 0 0.6rem; letter-spacing: -0.02em;
+        background: var(--grad-text); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+      }
+      p { color: var(--muted); line-height: 1.7; margin: 0 0 1.8rem; }
+      code {
+        font-family: var(--mono); font-size: 0.85em; background: rgba(139, 92, 246, 0.1);
+        border: 1px solid var(--line); color: #d8ccfe; border-radius: 6px; padding: 0.12em 0.4em;
+      }
+      nav { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+      a.button {
+        display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 999px;
+        font-size: 0.9em; font-weight: 650; line-height: 1; text-decoration: none;
+        border: 1px solid var(--line-light); color: var(--text); background: rgba(255, 255, 255, 0.03);
+        transition: transform 0.16s, background 0.16s, box-shadow 0.16s;
+      }
+      a.button:hover { transform: translateY(-2px); background: rgba(255, 255, 255, 0.07); }
+      a.button.primary {
+        border: 1px solid transparent; color: #fff;
+        background: linear-gradient(135deg, var(--violet), var(--pink) 55%, var(--orange));
+        box-shadow: 0 4px 24px rgba(236, 72, 153, 0.35);
+      }
+      a.button.primary:hover { box-shadow: 0 8px 30px rgba(236, 72, 153, 0.45); }
+      footer { margin-top: 2.4rem; font-family: var(--mono); font-size: 0.75em; color: var(--faint); }
+      footer a { color: var(--muted); text-decoration: none; }
+      footer a:hover { color: #c4b5fd; }
+      ::selection { background: rgba(139, 92, 246, 0.45); color: #fff; }
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <a class="brand" href="/">FYRwall<span class="brand-dot">.</span>docs</a>
+      <p class="eyebrow">Error 404 &middot; Route unknown</p>
+      <h1>Page not found</h1>
+      <p>This FYRwall documentation page does not exist. The docs live under <code>/docs/</code>, starting at the <a href="/docs/" style="color:#c4b5fd">docs hub</a>.</p>
+      <nav>
+        <a class="button primary" href="/">Docs home</a>
+        <a class="button" href="/docs/installation/">Installation guide</a>
+        <a class="button" href="https://github.com/PotenFYR-Studios/FYRwall" target="_blank" rel="noopener">GitHub repository</a>
+        <a class="button" href="https://github.com/PotenFYR-Studios/FYRwall/issues" target="_blank" rel="noopener">Report an issue</a>
+      </nav>
+      <footer>Part of <a href="https://www.potenfyr.in/" target="_blank" rel="noopener">PotenFYR Studios</a></footer>
+    </main>
+  </body>
+</html>

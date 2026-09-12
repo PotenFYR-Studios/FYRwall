@@ -10,6 +10,38 @@ extra careful with changes, so please read this guide.
 - Build: `./scripts/build.sh`
 - Test: `./scripts/docker-test.sh` (never run tests on the host)
 
+## Everyday commands
+
+Backend:
+
+    go build ./...                    # compile everything
+    go test ./...                     # unit tests (prefer the container runner)
+    ./scripts/docker-test.sh          # full suite, Docker-isolated, offline
+    gofmt -l . && go vet ./...        # formatting + static checks
+    gofmt -w <file>                   # apply formatting
+
+Frontend (web UI):
+
+    cd web && bun install             # deps
+    cd web && bun run build           # production build
+
+Docs site (this directory drives fyrwall.docs.potenfyr.in):
+
+    cd docs && bun install            # deps
+    cd docs && bun run dev            # dev server with HMR
+    cd docs && bun run build          # build + prerender all routes to dist/
+    cd docs && bun run typecheck      # tsc --noEmit
+
+Docs content is plain markdown in `docs/content/*.md`; the site imports it
+directly at build time, so editing a file there is all it takes. The
+install script shown on the site is synced from `packaging/install.sh`
+during the build.
+
+Cross-compile and release:
+
+    ./scripts/cross-build.sh          # all 7 arches -> dist/ (+ SHA256SUMS)
+    FYRWALL_VERSION=... ./scripts/cross-build.sh
+
 ## Ground rules
 
 1. **No shell interpolation anywhere.** All subprocess calls go through
@@ -30,16 +62,19 @@ extra careful with changes, so please read this guide.
 - Parsers need fixtures first (including malformed input cases)
 - Explain the security implications of any change touching `internal/agent`,
   `internal/auth`, `internal/firewall/manager.go`, or `internal/secureconfig`
+  (the PR template asks for this)
 - CI must be green: Docker tests, 7-arch compile matrix, frontend build
 
 ## Reporting issues
 
 Use [GitHub Issues](https://github.com/PotenFYR-Studios/FYRwall/issues) for
-bugs and feature requests. For security-sensitive reports, please mark the
-issue title with `[security]` and avoid posting exploit details until a fix
-lands.
+bugs and feature requests - there are templates for bugs, features,
+docs, questions and security concerns. For anything you believe is
+**exploitable**, do not open a public issue: use [private vulnerability
+reporting](https://github.com/PotenFYR-Studios/FYRwall/security/advisories/new)
+and see [SECURITY.md](SECURITY.md).
 
 ## License
 
 By contributing you agree your contributions are licensed under the
-Apache-2.0 WITH Commons Clause license covering the repository.
+Apache-2.0 with Commons Clause license covering the repository.

@@ -30,6 +30,9 @@ RUN apk add --no-cache ca-certificates iptables ip6tables \
 COPY --from=build /out/fyrwall /usr/local/bin/fyrwall
 COPY packaging/config.example.yaml /etc/fyrwall/config.yaml
 
+# OCI license label (fix-round-2 W4).
+LABEL org.opencontainers.image.licenses="Apache-2.0 WITH Commons-Clause-1.0"
+
 USER fyrwall
 EXPOSE 7443
 VOLUME ["/var/lib/fyrwall", "/var/log/fyrwall"]

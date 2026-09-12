@@ -10,7 +10,7 @@ you, the right to Sell the Software.
 For purposes of the foregoing, "Sell" means practicing any or all of
 the rights granted to you under the License to provide to third parties,
 for a fee or other consideration (including without limitation fees for
-hosting or consulting/ support services related to the Software), a
+hosting or consulting/support services related to the Software), a
 product or service whose value derives, entirely or substantially, from
 the functionality of the Software. Any license notice or attribution
 required by the License must also include this Commons Clause License
@@ -18,11 +18,21 @@ Condition notice.
 
 Software: FYRwall
 
-License: Apache License 2.0
+License: Apache License, Version 2.0
 
-Copyright 2026 PotenFYR Studios
+Licensor: PotenFYR Studios
 
-----------------------------------------------------------------------
+Human-Readable Summary (not part of the license):
+
+  You are free to fork, modify, and use this software for free, for any
+  purpose - including commercial use, and building products or services
+  around it. You may NOT, however, sell the software itself (or a
+  product or service whose value derives entirely or substantially from
+  the functionality of this software) as a paid product.
+
+  Licensor: PotenFYR Studios (https://github.com/PotenFYR-Studios)
+
+  The full text of the Apache License 2.0 follows.
 
 
                                  Apache License
@@ -213,7 +223,7 @@ Copyright 2026 PotenFYR Studios
       same "printed page" as the copyright notice for easier
       identification within third-party archives.
 
-   Copyright [yyyy] [name of copyright owner]
+   Copyright 2026 PotenFYR Studios
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.

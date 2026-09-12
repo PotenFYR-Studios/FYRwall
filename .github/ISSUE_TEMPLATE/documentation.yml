@@ -1,0 +1,44 @@
+name: Documentation
+description: Report an issue or gap in the docs (site content or README).
+labels: ["documentation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Spotted something wrong, outdated or confusing in the docs? Tell us
+        where and what. If a command in the docs does not work, paste the
+        exact error.
+  - type: dropdown
+    id: location
+    attributes:
+      label: Where is the problem?
+      options:
+        - Docs site (fyrwall.docs.potenfyr.in)
+        - README
+        - CONTRIBUTING.md
+        - SECURITY.md
+        - Code comments / docstrings
+    validations:
+      required: true
+  - type: input
+    id: page
+    attributes:
+      label: Page or section
+      description: URL or file path, plus the heading if you know it.
+      placeholder: https://fyrwall.docs.potenfyr.in/docs/installation/
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What is wrong?
+      description: Include the exact text or command that is incorrect.
+    validations:
+      required: true
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested fix
+      description: What should it say instead?
+    validations:
+      required: false

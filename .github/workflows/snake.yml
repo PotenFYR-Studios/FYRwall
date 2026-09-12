@@ -17,11 +17,11 @@ jobs:
   generate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: Platane/snk/svg-only@v3
         with:
-          github_user_name: DawnOfDedSec
+          github_user_name: PotenFYR-Studios
           outputs: |
             dist/github-snake.svg
             dist/github-snake-dark.svg?palette=github-dark

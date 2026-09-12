@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://fyrwall.docs.potenfyr.in/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://fyrwall.docs.potenfyr.in/docs</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://fyrwall.docs.potenfyr.in/docs/installation</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://fyrwall.docs.potenfyr.in/docs/docker</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://fyrwall.docs.potenfyr.in/docs/updating</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://fyrwall.docs.potenfyr.in/docs/architecture</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://fyrwall.docs.potenfyr.in/docs/safety</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://fyrwall.docs.potenfyr.in/docs/security</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://fyrwall.docs.potenfyr.in/docs/operation</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://fyrwall.docs.potenfyr.in/docs/configuration</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://fyrwall.docs.potenfyr.in/docs/extensions</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://fyrwall.docs.potenfyr.in/docs/extensions-guide</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://fyrwall.docs.potenfyr.in/docs/troubleshooting</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://fyrwall.docs.potenfyr.in/docs/faq</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://fyrwall.docs.potenfyr.in/docs/license</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://fyrwall.docs.potenfyr.in/examples</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://fyrwall.docs.potenfyr.in/about</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
+</urlset>

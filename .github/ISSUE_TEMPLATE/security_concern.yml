@@ -1,0 +1,61 @@
+name: Security concern (non-vulnerability)
+description: A security-relevant question, hardening idea or documentation gap - NOT an exploitable bug.
+labels: ["security"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **This form is for security questions and hardening ideas only.**
+
+        If you found something **exploitable**, stop here: use
+        [private vulnerability reporting](https://github.com/PotenFYR-Studios/FYRwall/security/advisories/new)
+        instead of opening a public issue. Do not post exploit details,
+        proof-of-concept code or payloads publicly.
+
+        **Never post secrets** (passwords, tokens, session cookies, agent or
+        TLS keys) in this issue or any public channel. See
+        [SECURITY.md](../blob/master/SECURITY.md) for the full policy.
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What kind of concern is this?
+      options:
+        - Hardening suggestion
+        - Security documentation gap or unclear guarantee
+        - Question about the security model
+        - Concern about a dependency or supply chain
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Auth / sessions / RBAC
+        - Privilege separation (server / agent / priv helper)
+        - Config encryption at rest
+        - Transactional apply / rollback / restore points
+        - Installation and checksums
+        - Docker image
+        - Docs
+    validations:
+      required: true
+  - type: textarea
+    id: detail
+    attributes:
+      label: Details
+      description: |
+        Describe the concern and its impact. Redact hosts, ports, rules and
+        anything identifying your infrastructure.
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Acknowledgements
+      options:
+        - label: This is NOT an exploitable vulnerability (those go to private reporting).
+          required: true
+        - label: My report contains no secrets and no working exploit code.
+          required: true

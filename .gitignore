@@ -32,6 +32,9 @@ web/bun.lockb.bak
 docs/website/node_modules/
 docs/website/dist/
 docs/website/.vite/
+docs/node_modules/
+docs/dist/
+docs/.vite/
 
 # Embedded assets: build outputs are synced in, but keep the folder tracked
 webembed/dist/*

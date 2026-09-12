@@ -1,0 +1,25 @@
+name: Question
+description: Ask how something works. For faster answers, try Discord first.
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Questions are welcome. If you want a quick answer, the
+        [Discord](https://discord.com/invite/zUaN2FPBec) is usually faster.
+        Docs live at https://fyrwall.docs.potenfyr.in - the
+        [FAQ](https://fyrwall.docs.potenfyr.in/docs/faq/) covers common ones.
+  - type: textarea
+    id: question
+    attributes:
+      label: Your question
+      description: What are you trying to figure out?
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: What you already tried, and what the docs said. Include your distro and FYRwall version if relevant.
+    validations:
+      required: false

@@ -27,12 +27,14 @@ notification.
 
 ## Storage
 
-SQLite by default (pure-Go driver, WAL, tuned pragmas, single-writer
-pooling). PostgreSQL optional for large fleets via DSN. No other
-infrastructure required; fully offline-capable.
+SQLite (pure-Go driver, WAL, tuned pragmas, single-writer pooling) is the
+storage engine. No external database infrastructure required; fully
+offline-capable. The config schema reserves a `postgres` driver option
+(with a required DSN) for an upcoming backend.
 
 ## Databases
 
-Local SQLite is the tuned default (zero config). Postgres, MySQL/
-MariaDB and SQLite-in-custom-path are first-class driver options.
-Connection pooling, busy timeouts and integrity checks are built in.
+Local SQLite is the tuned default (zero config). Connection pooling, busy
+timeouts and integrity checks are built in. The config schema accepts
+`postgres` as a driver value, reserved for an upcoming backend; SQLite
+remains the supported engine today.
