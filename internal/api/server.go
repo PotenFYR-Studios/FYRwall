@@ -89,6 +89,10 @@ func (s *Server) Router() http.Handler {
 	// below take precedence by explicit registration.
 	if ui, err := webembed.Handler(); err == nil {
 		r.Handle("/*", ui)
+	} else {
+		// Fail loudly instead of serving a blank page at "/".
+		s.log.Error().Str("event_code", "WEB_UI_MISSING").Err(err).
+			Msg("embedded web GUI unavailable; running in API-only mode")
 	}
 
 	// Public: health (unauthenticated, minimal data) + version.

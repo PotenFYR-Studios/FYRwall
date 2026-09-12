@@ -1,0 +1,18 @@
+# Keep the build context lean; the Dockerfile builds the web GUI itself
+# from web/ sources, so local build outputs and dev state stay out.
+.git
+.gitignore
+.dockerignore
+dist/
+docs/
+packaging/_output/
+test/
+tests/
+web/node_modules/
+web/dist/
+web/.vite/
+**/*.db
+**/*.db-wal
+**/*.db-shm
+**/*.log
+secrets/

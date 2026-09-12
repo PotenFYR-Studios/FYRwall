@@ -3,8 +3,22 @@
 # (or host install) is required for firewall control on that host since
 # containers cannot safely mutate the host firewall.
 #
+# Stage 1 builds the web GUI from source: webembed/dist contents are
+# gitignored, so a Docker build must compile the frontend itself or the
+# binary embeds an empty directory and the GUI loads blank.
+#
 # Build:  docker build -t fyrwall:latest .
 # Run:    see docs/content/docker.md or README "Docker" section
+
+# ---- Stage 1: web GUI (React/Vite) ----
+FROM node:24-alpine AS web
+WORKDIR /src/web
+COPY web/package.json ./
+RUN npm install --no-audit --no-fund
+COPY web/ ./
+RUN npm run build
+
+# ---- Stage 2: Go binary with the GUI embedded ----
 FROM golang:1.24-alpine AS build
 
 ARG VERSION=docker
@@ -14,6 +28,11 @@ WORKDIR /src
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
+
+# Replace (never merge) the embedded GUI with the stage-1 output so a
+# stale local webembed/dist in the build context cannot leak in.
+RUN rm -rf webembed/dist && mkdir -p webembed/dist
+COPY --from=web /src/web/dist/ webembed/dist/
 
 RUN CGO_ENABLED=0 GOOS=linux go build -trimpath \
     -ldflags "-s -w -X github.com/PotenFYR-Studios/FYRwall/internal/version.Version=${VERSION} -X github.com/PotenFYR-Studios/FYRwall/internal/version.Commit=${COMMIT}" \

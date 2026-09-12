@@ -99,3 +99,6 @@ test-results/
 CLAUDE.md
 .rtk
 .plan
+
+# Local server harness state (tests/run-server.sh)
+tests/.tmp/
