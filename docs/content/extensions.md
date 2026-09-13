@@ -41,3 +41,5 @@ grants. Denied capabilities simply do not activate.
 
 Zip the directory; share it. The registry hashes all assets and shows
 the digest at install so tampering is detectable.
+
+Next: [Extensions Guide](extensions-guide.md)

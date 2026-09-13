@@ -35,3 +35,5 @@ passwords, revoke sessions. All actions are audited.
 Created automatically before every change. Retention: 50 automatic,
 20 manual by default, both configurable. Restoring shows a diff first
 and snapshots current state before restoring.
+
+Next: [Extensions](extensions.md) · [Troubleshooting](troubleshooting.md)

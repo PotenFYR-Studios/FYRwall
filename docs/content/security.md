@@ -39,3 +39,5 @@ and tokens travel via environment or secret files (env:, file: refs).
 No execution, no direct firewall mutation, no user management, no
 credential or key access. Extensions are declarative and
 capability-scoped, denied by default, granted by an admin at install.
+
+Next: [Safety and Restore Points](safety.md) · [Extensions](extensions.md)

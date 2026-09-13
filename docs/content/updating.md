@@ -22,6 +22,15 @@ point, downloads the matching artifact, verifies SHA256SUMS, replaces the
 binary, runs migrations, restarts services, runs post-update health checks.
 Your config is never overwritten.
 
+### Release builds stay current
+
+CI keeps GitHub Releases fresh: while the VERSION file is unchanged, every
+push to `master` rebuilds the release assets in place and regenerates the
+notes (a single build line per version, never accumulating); a version-bump
+tag creates the next release. The one-liner therefore always fetches the
+latest verified build. Full replace semantics:
+[Releases and CI Builds](releases.md).
+
 ## Rollback a bad update
 
 Restore points and DB backups are kept. Reinstall the previous release
@@ -31,3 +40,5 @@ tarball from GitHub Releases (checksums on file) and restart.
 
 FYRwall update checks are off by default - no telemetry. When enabled, the
 only outbound request is the manifest GET.
+
+Next: [Releases and CI Builds](releases.md) · [Troubleshooting](troubleshooting.md)

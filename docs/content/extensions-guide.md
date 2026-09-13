@@ -73,3 +73,5 @@
 - Channel types limited to webhook, ntfy, gotify, discord
 - Check types limited to http, tcp, file - no command execution
 - Asset digest is computed and displayed at install for tamper evidence
+
+Next: [FAQ](faq.md) · [Troubleshooting](troubleshooting.md)

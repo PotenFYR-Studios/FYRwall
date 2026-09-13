@@ -54,5 +54,4 @@ the host over SSH to confirm or adjust.
 
 ## When things go wrong
 
-See [Troubleshooting](troubleshooting.md) for SSH lockout recovery, backend
-conflicts, agent failures and disk usage.
+Next: [Security Model](security.md) · [Troubleshooting](troubleshooting.md)

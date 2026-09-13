@@ -131,3 +131,5 @@ chosen in the web setup wizard on first boot, not provisioned via env.
 Config is stored encrypted (FYRCFG1 format) with AES-256-GCM and a
 root-owned 0600 keyfile, with tamper detection and a one-time plaintext
 migration. Writes go through the authenticated web UI only.
+
+Next: [Operation](operation.md) · [Safety and Restore Points](safety.md)

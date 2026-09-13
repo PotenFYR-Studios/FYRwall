@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:8b5cf6,50:ec4899,100:f97316&height=220&section=header&text=FYRwall&fontSize=52&fontColor=ffffff&fontAlignY=34&animation=twinkling" width="100%" alt="FYRwall banner"/>
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:8b5cf6,50:ec4899,100:f97316&height=220&section=header&text=FYRwall&fontSize=52&fontColor=ffffff&fontAlignY=34&desc=Safe%20firewall%20management%20for%20Linux.%20Every%20change%20verified%2C%20every%20mistake%20rolled%20back.&descSize=18&descAlignY=55&animation=twinkling" width="100%" alt="FYRwall banner"/>
 
 [![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=20&pause=1200&color=8B5CF6&center=true&vCenter=true&width=800&lines=Transactional+firewall+changes+with+auto-rollback;Lockout+protection+built+in+%F0%9F%9B%A1%EF%B8%8F;UFW+%7C+iptables+%7C+nftables+-+one+GUI;Unprivileged+by+design.+No+shell.+No+root+UI.)](https://github.com/PotenFYR-Studios/FYRwall)
 
@@ -11,7 +11,7 @@
 [![License](https://img.shields.io/badge/License-Apache--2.0%20%2B%20Commons%20Clause-2ea043?style=for-the-badge&logo=apache&logoColor=white&labelColor=1c1e26)](https://github.com/PotenFYR-Studios/FYRwall/blob/master/LICENSE)
 [![View](https://komarev.com/ghpvc/?username=PotenFYR-Studios-FYRwall&color=ec4899&style=for-the-badge&label=VIEW&labelColor=1c1e26)](https://github.com/PotenFYR-Studios/FYRwall)
 
-[Overview](#overview) · [Install](#install) · [Docker](#docker) · [Docs](https://fyrwall.docs.potenfyr.in/) · [Extensions](#extensions) · [FAQ](#faq) · [Releases](https://github.com/PotenFYR-Studios/FYRwall/releases)
+[Overview](#overview) · [Install](#install) · [Quick Start](#quick-start) · [Docker](#docker) · [Docs](https://fyrwall.docs.potenfyr.in/) · [Extensions](#extensions) · [Releases](https://github.com/PotenFYR-Studios/FYRwall/releases)
 
 ```bash
 curl -fsSL https://fyrwall.docs.potenfyr.in/install.sh | sudo sh
@@ -133,9 +133,164 @@ internal/
 web/                    React/TS frontend source (built with bun)
 webembed/               Embedded frontend dist served by the Go binary
 scripts/                docker-test.sh, build.sh, cross-build.sh
-packaging/              systemd units, install.sh
+packaging/              systemd units, install.sh, uninstall.sh
 test/                   Fixtures
 ```
+
+---
+
+## Install
+
+Three supported ways to install. Every method ships from GitHub Releases,
+installs the same single static binary, and never touches your firewall
+rules. Full details: [docs/content/installation.md](docs/content/installation.md) · [Releases and CI builds](docs/content/releases.md).
+
+| Method | Best for |
+|---|---|
+| 1. Installer script (curl) | most hosts — fastest, checksum-verified |
+| 2. Release tarball (manual) | air-gapped hosts, custom prefixes, no-pipeline installs |
+| 3. Docker | containerized server, ephemeral/infra-as-code hosts (see [Docker](#docker)) |
+
+### Method 1 — installer script (recommended)
+
+```bash
+curl -fsSL https://fyrwall.docs.potenfyr.in/install.sh | sudo sh
+```
+
+Same script, straight from GitHub Releases:
+
+```bash
+curl -fsSL https://github.com/PotenFYR-Studios/FYRwall/releases/latest/download/install.sh | sudo sh
+```
+
+Review-first (safer — download, read, then run):
+
+```bash
+curl -fLo install-fyrwall.sh https://github.com/PotenFYR-Studios/FYRwall/releases/latest/download/install.sh
+less install-fyrwall.sh
+sudo sh install-fyrwall.sh
+```
+
+The installer: creates the unprivileged `fyrwall` service account, installs
+the binary (checksum-verified release download), the config (existing config
+is never overwritten), the hardened systemd units and the desktop entry,
+then runs non-destructive preflight. Supported arches: amd64, arm64, arm,
+386, ppc64le, s390x, riscv64.
+
+Pin a version or enforce offline installs with environment variables:
+
+```bash
+FYRWALL_VERSION=0.1.0 sudo -E sh install.sh    # pin a version
+FYRWALL_PREFIX=/opt/fyrwall sudo -E sh install.sh
+FYRWALL_NO_DOWNLOAD=1 sudo -E sh install.sh    # air-gap enforcement: local tarball or dist/fyrwall only
+```
+
+### Method 2 — manual tarball from GitHub Releases
+
+```bash
+curl -fLO https://github.com/PotenFYR-Studios/FYRwall/releases/latest/download/fyrwall_0.1.0_linux_amd64.tar.gz
+curl -fLO https://github.com/PotenFYR-Studios/FYRwall/releases/latest/download/SHA256SUMS
+grep "fyrwall_0.1.0_linux_amd64.tar.gz" SHA256SUMS | sha256sum -c -
+tar -xzf fyrwall_0.1.0_linux_amd64.tar.gz
+sudo install -d -m 0750 /etc/fyrwall
+sudo install -m 0755 fyrwall_0.1.0_linux_amd64/fyrwall /usr/local/bin/fyrwall
+sudo install -m 0640 fyrwall_0.1.0_linux_amd64/config.example.yaml /etc/fyrwall/config.yaml
+sudo install -m 0644 fyrwall_0.1.0_linux_amd64/packaging/systemd/*.service /etc/systemd/system/
+sudo systemctl daemon-reload
+```
+
+(Adjust version/arch in the filenames; `uname -m` → x86_64 is amd64,
+aarch64 is arm64.)
+
+### Method 3 — Docker
+
+```bash
+docker run -d --name fyrwall \
+  -p 127.0.0.1:7443:7443 \
+  -v fyrwall-data:/var/lib/fyrwall \
+  ghcr.io/potenfyr-studios/fyrwall:latest
+```
+
+Compose topology (server + host-networked agent) and security notes:
+[Docker](#docker).
+
+First boot and the daily workflow: [Quick Start](#quick-start).
+
+### Upgrade and uninstall
+
+Re-running any install method is a safe in-place upgrade (config is never
+overwritten; the in-tool `fyrwall update` path is described in
+[Updating](#updating)). Uninstall with zero leftovers:
+
+```bash
+sudo sh packaging/uninstall.sh --all           # keeps config + restore points (asks)
+sudo sh packaging/uninstall.sh --all --purge   # removes everything incl. service user
+```
+
+---
+
+## Quick Start
+
+### Run locally
+
+```bash
+# config with a writable sqlite path
+FYRWALL_DB_SQLITE_PATH=./fyrwall.db ./fyrwall server --config config.yaml
+
+./fyrwall doctor                 # read-only diagnostics
+./fyrwall preflight              # diagnostics + backend detection
+./fyrwall status                 # firewall + ownership summary
+```
+
+The UI listens on `127.0.0.1:7443` by default. A non-loopback bind without TLS is refused unless `FYRWALL_ALLOW_INSECURE_BIND=true`.
+
+### First boot
+
+1. The server runs preflight, detects the platform and firewall backend, opens the database, and applies migrations.
+2. Ownership is resolved. Multiple active managers puts FYRwall in DEGRADED with writes blocked and a persistent critical notification.
+3. Open `http://127.0.0.1:7443`: on a fresh install the one-time setup wizard
+   creates the super admin account and its password right in the browser
+   (works the same for Docker - there is no CLI password step).
+4. Sign in; the UI issues a CSRF token automatically.
+
+### Configuration
+
+`/etc/fyrwall/config.yaml` (all keys optional, sensible defaults):
+
+```yaml
+server:
+  bind: "127.0.0.1"
+  port: 7443
+tls:
+  enabled: false
+  cert_file: ""
+  key_file: ""
+database:
+  driver: "sqlite"
+  sqlite_path: "/var/lib/fyrwall/fyrwall.db"
+firewall:
+  backend: "auto"                 # auto | ufw | iptables
+  safe_apply_timeout_seconds: 60
+  allow_write_on_manager_conflict: false
+service:
+  autostart: true
+logging:
+  level: "info"
+  format: "json"
+  file_enabled: true
+  file_path: "/var/log/fyrwall/fyrwall.log"
+restore_points:
+  auto_enabled: true
+  retain_automatic: 50
+  retain_manual: 20
+security:
+  session_idle_timeout_minutes: 30
+  login_rate_limit_per_minute: 5
+```
+
+Environment overrides: `FYRWALL_SERVER_BIND`, `FYRWALL_SERVER_PORT`, `FYRWALL_DB_SQLITE_PATH`, `FYRWALL_LOG_LEVEL`, `FYRWALL_FIREWALL_BACKEND`, `FYRWALL_TLS_ENABLED`, `FYRWALL_TLS_CERT`, `FYRWALL_TLS_KEY`, `FYRWALL_SAFE_APPLY_TIMEOUT`, `FYRWALL_ALLOW_INSECURE_BIND`.
+
+Validate with `./fyrwall config validate --config your.yaml`.
 
 ---
 
@@ -204,71 +359,6 @@ Frontend:
 ```bash
 cd web && bun install && bun run build   # typecheck (tsc) + vite build
 ```
-
----
-
-## Running
-
-### Quick start (local)
-
-```bash
-# config with a writable sqlite path
-FYRWALL_DB_SQLITE_PATH=./fyrwall.db ./fyrwall server --config config.yaml
-
-./fyrwall doctor                 # read-only diagnostics
-./fyrwall preflight              # diagnostics + backend detection
-./fyrwall status                 # firewall + ownership summary
-```
-
-The UI listens on `127.0.0.1:7443` by default. A non-loopback bind without TLS is refused unless `FYRWALL_ALLOW_INSECURE_BIND=true`.
-
-### First boot
-
-1. The server runs preflight, detects the platform and firewall backend, opens the database, and applies migrations.
-2. Ownership is resolved. Multiple active managers puts FYRwall in DEGRADED with writes blocked and a persistent critical notification.
-3. Open `http://127.0.0.1:7443`: on a fresh install the one-time setup wizard
-   creates the super admin account and its password right in the browser
-   (works the same for Docker - there is no CLI password step).
-4. Sign in; the UI issues a CSRF token automatically.
-
-### Configuration
-
-`/etc/fyrwall/config.yaml` (all keys optional, sensible defaults):
-
-```yaml
-server:
-  bind: "127.0.0.1"
-  port: 7443
-tls:
-  enabled: false
-  cert_file: ""
-  key_file: ""
-database:
-  driver: "sqlite"
-  sqlite_path: "/var/lib/fyrwall/fyrwall.db"
-firewall:
-  backend: "auto"                 # auto | ufw | iptables
-  safe_apply_timeout_seconds: 60
-  allow_write_on_manager_conflict: false
-service:
-  autostart: true
-logging:
-  level: "info"
-  format: "json"
-  file_enabled: true
-  file_path: "/var/log/fyrwall/fyrwall.log"
-restore_points:
-  auto_enabled: true
-  retain_automatic: 50
-  retain_manual: 20
-security:
-  session_idle_timeout_minutes: 30
-  login_rate_limit_per_minute: 5
-```
-
-Environment overrides: `FYRWALL_SERVER_BIND`, `FYRWALL_SERVER_PORT`, `FYRWALL_DB_SQLITE_PATH`, `FYRWALL_LOG_LEVEL`, `FYRWALL_FIREWALL_BACKEND`, `FYRWALL_TLS_ENABLED`, `FYRWALL_TLS_CERT`, `FYRWALL_TLS_KEY`, `FYRWALL_SAFE_APPLY_TIMEOUT`, `FYRWALL_ALLOW_INSECURE_BIND`.
-
-Validate with `./fyrwall config validate --config your.yaml`.
 
 ---
 
@@ -352,13 +442,18 @@ Every update creates a database backup and firewall restore point first; config 
 
 ## Auto build, releases and containers
 
+Every GitHub Release ships: `install.sh`, `uninstall.sh`, 7-architecture
+tarballs and a `SHA256SUMS` manifest covering all of it. The pipeline is
+idempotent — same version never duplicates, it replaces.
+
 | Event | What happens |
 |---|---|
-| push to `master` | CI test matrix + container image rebuild; existing release changelog gets a build line; rolling image tags refreshed |
-| version bump tag `vX.Y.Z` | Full release: new GitHub Release with changelog + 7-arch tarballs + SHA256SUMS + new `:vX.Y.Z` image tag |
+| push to `master` | CI test matrix + container image rebuild; all release artifacts are rebuilt and **replace** the current version's release assets in place; notes are regenerated with a single build line; rolling image tags refreshed |
+| version bump tag `vX.Y.Z` | Full release: release (re)created with changelog + installers + 7-arch tarballs + SHA256SUMS; new `:vX.Y.Z` image tag on top of rolling tags |
+| version tag re-pushed | Existing release for that tag is deleted (tag kept) and recreated — builds and changelog fully replaced |
 | push to `docs/**` | Docs site auto-deploys to GitHub Pages |
 
-Same version, new commits = refreshed builds and changelog build-lines, no new release. Bumped version = new tag, new release, new image tag. Fully automatic.
+Same version, new commits = refreshed builds and regenerated changelog, no new release. Bumped version = new tag, new release, new image tag. Fully automatic. Details: [docs/content/releases.md](docs/content/releases.md).
 
 ## Architecture
 

@@ -90,3 +90,5 @@ Local SQLite is the tuned default (zero config). Connection pooling, busy
 timeouts and integrity checks are built in. The config schema accepts
 `postgres` as a driver value, reserved for an upcoming backend; SQLite
 remains the supported engine today.
+
+Next: [Safety and Restore Points](safety.md) · [Security Model](security.md)

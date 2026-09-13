@@ -48,3 +48,5 @@ socket API, never raw commands.
 - The bundled config uses FYRWALL_ALLOW_INSECURE_BIND=true because the
   container default bind is wide; put TLS in front for real exposure
 - Volumes keep the database, restore points and logs across upgrades
+
+Next: [Configuration](configuration.md) · [Updating](updating.md)

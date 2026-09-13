@@ -41,6 +41,13 @@ export const DOCS: DocMeta[] = [
     group: "Get started",
   },
   {
+    slug: "releases",
+    title: "Releases and CI Builds",
+    description:
+      "What every GitHub Release ships (tarballs, install.sh, uninstall.sh, SHA256SUMS), how CI replaces same-version builds, and how to install straight from a release.",
+    group: "Get started",
+  },
+  {
     slug: "architecture",
     title: "Architecture",
     description:

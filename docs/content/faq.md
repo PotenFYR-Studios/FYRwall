@@ -66,3 +66,5 @@ paid support whose value is FYRwall itself.
 Keep the LICENSE file and attribution in your distribution. If you
 redistribute, your license notice must include the Commons Clause condition
 alongside Apache-2.0.
+
+Next: [License](license.md) · [Installation](installation.md)

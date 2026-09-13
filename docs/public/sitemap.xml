@@ -5,6 +5,7 @@
   <url><loc>https://fyrwall.docs.potenfyr.in/docs/installation</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://fyrwall.docs.potenfyr.in/docs/docker</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://fyrwall.docs.potenfyr.in/docs/updating</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://fyrwall.docs.potenfyr.in/docs/releases</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://fyrwall.docs.potenfyr.in/docs/architecture</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://fyrwall.docs.potenfyr.in/docs/safety</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://fyrwall.docs.potenfyr.in/docs/security</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
