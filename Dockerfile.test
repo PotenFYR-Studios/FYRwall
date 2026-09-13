@@ -1,7 +1,7 @@
 # FYRwall CI/test image: Go toolchain + iptables binaries for parser
 # fixtures. Tests never touch host firewall state; the stub backend and
 # fixture parsing keep everything in-process.
-FROM golang:1.24-bookworm AS test
+FROM golang:1.26.8-bookworm AS test
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     iptables \

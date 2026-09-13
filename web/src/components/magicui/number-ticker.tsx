@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { useInView, useMotionValue, useSpring } from "framer-motion";
+import { useInView, useMotionValue, useReducedMotion, useSpring } from "framer-motion";
 
 import { cn } from "../../lib/utils";
 
@@ -17,28 +17,35 @@ export function NumberTicker({
   delay?: number;
 }) {
   const ref = useRef<HTMLSpanElement>(null);
+  const reducedMotion = useReducedMotion();
   const motionValue = useMotionValue(0);
   const springValue = useSpring(motionValue, { damping: 60, stiffness: 100 });
   const isInView = useInView(ref, { once: true, margin: "0px" });
 
   useEffect(() => {
-    if (isInView) {
-      const t = setTimeout(() => motionValue.set(value), delay * 1000);
-      return () => clearTimeout(t);
-    }
-  }, [motionValue, isInView, delay, value]);
+    if (!isInView) return;
 
-  useEffect(
-    () =>
-      springValue.on("change", (latest) => {
-        if (ref.current) {
-          ref.current.textContent = Intl.NumberFormat("en-US").format(
-            Math.round(latest),
-          );
-        }
-      }),
-    [springValue],
-  );
+    if (reducedMotion) {
+      motionValue.jump(value);
+      return;
+    }
+
+    const timeout = setTimeout(() => motionValue.set(value), delay * 1000);
+    return () => clearTimeout(timeout);
+  }, [motionValue, isInView, reducedMotion, delay, value]);
+
+  useEffect(() => {
+    if (reducedMotion && ref.current) {
+      ref.current.textContent = Intl.NumberFormat("en-US").format(value);
+      return;
+    }
+
+    return springValue.on("change", (latest) => {
+      if (ref.current) {
+        ref.current.textContent = Intl.NumberFormat("en-US").format(Math.round(latest));
+      }
+    });
+  }, [reducedMotion, springValue, value]);
 
   return (
     <span ref={ref} className={cn("inline-block tabular-nums", className)}>

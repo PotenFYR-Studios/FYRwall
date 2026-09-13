@@ -11,5 +11,8 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   base: process.env.VITE_BASE ?? "/",
-  build: { outDir: "dist", emptyOutDir: true },
+  build: {
+    outDir: process.env.VITE_OUT_DIR ?? "dist",
+    emptyOutDir: true,
+  },
 });

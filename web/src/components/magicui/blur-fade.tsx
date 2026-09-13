@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { useReducedMotion, motion } from "framer-motion";
 
 import { cn } from "../../lib/utils";
 
@@ -17,11 +17,13 @@ export function BlurFade({
   delay?: number;
   duration?: number;
 }) {
+  const reducedMotion = useReducedMotion();
+
   return (
     <motion.div
-      initial={{ opacity: 0, filter: "blur(6px)", y: 8 }}
-      animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
-      transition={{ delay, duration }}
+      initial={reducedMotion ? { opacity: 0 } : { opacity: 0, filter: "blur(6px)", y: 8 }}
+      animate={reducedMotion ? { opacity: 1 } : { opacity: 1, filter: "blur(0px)", y: 0 }}
+      transition={reducedMotion ? { delay, duration: 0.2 } : { delay, duration }}
       className={cn(className)}
     >
       {children}

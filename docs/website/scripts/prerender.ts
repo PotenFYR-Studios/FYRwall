@@ -34,7 +34,8 @@ try {
   await vite.close();
 
   // import.meta.url is percent-encoded; decode it (path contains a space).
-  const dist = decodeURIComponent(new URL("../dist/index.html", import.meta.url).pathname);
+const distDir = decodeURIComponent(new URL("../", import.meta.url).pathname);
+const dist = `${distDir}${process.env.VITE_OUT_DIR ?? "dist"}/index.html`;
   const file = await readFile(dist, "utf8");
   if (!file.includes('<div id="root"></div>')) {
     throw new Error("root div placeholder not found in dist/index.html");

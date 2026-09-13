@@ -1,6 +1,8 @@
 module github.com/PotenFYR-Studios/FYRwall
 
-go 1.24
+go 1.26
+
+toolchain go1.26.8
 
 require (
 	github.com/alexedwards/scs/v2 v2.8.0

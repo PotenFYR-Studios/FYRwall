@@ -137,7 +137,7 @@ try {
   const { AppShell } = await vite.ssrLoadModule("/src/App.tsx");
   const base = (process.env.VITE_BASE ?? "/").replace(/\/+$/, "");
 
-  const dist = resolve(here, "..", "dist");
+const dist = resolve(here, "..", process.env.VITE_OUT_DIR ?? "dist");
   console.log(`[prerender] dist: ${dist}`);
   const shellPath = resolve(dist, "index.html");
   const shell = await readFile(shellPath, "utf8");

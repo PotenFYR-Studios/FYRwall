@@ -10,7 +10,7 @@ import Login from "./pages/Login";
 import Setup from "./pages/Setup";
 import Fleet from "./pages/Fleet";
 import { HealthBadge } from "./components/HealthBadge";
-import { BlurFade, ShimmerText } from "./components/magicui";
+import { BlurFade, DotPattern, ShimmerText } from "./components/magicui";
 import { sendJSON, useInvalidateMe, useMe, useSetupNeeded } from "./lib/auth";
 
 const nav = [
@@ -36,6 +36,10 @@ function Shell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="relative min-h-screen bg-zinc-950 text-zinc-100">
+      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-80 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(249,115,22,0.16),transparent_65%)] blur-2xl" />
+        <DotPattern className="h-full w-full fill-amber-500/20 [mask-image:radial-gradient(70%_60%_at_50%_0%,white,transparent)]" />
+      </div>
       <header className="sticky top-0 z-10 border-b border-zinc-800 bg-zinc-950/90 px-6 py-3 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center gap-6">
           <span className="flex items-center gap-2 font-bold text-lg">
@@ -74,7 +78,7 @@ function Shell({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       </header>
-      <BlurFade>
+      <BlurFade duration={0.5}>
         <main className="mx-auto max-w-7xl p-6">{children}</main>
       </BlurFade>
     </div>
