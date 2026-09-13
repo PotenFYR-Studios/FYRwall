@@ -175,5 +175,56 @@ CREATE TABLE enrollment_tokens (
 	used_by TEXT
 );
 `},
+		{Version: 3, Name: "fleet_sync", SQL: `
+ALTER TABLE agents ADD COLUMN credential_hash TEXT;
+ALTER TABLE agents ADD COLUMN sequence INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE agents ADD COLUMN state_hash TEXT;
+ALTER TABLE agents ADD COLUMN policy_revision INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE agents ADD COLUMN status_json TEXT;
+ALTER TABLE agents ADD COLUMN rules_json TEXT;
+ALTER TABLE agents ADD COLUMN capabilities_json TEXT;
+
+CREATE TABLE agent_commands (
+	command_id TEXT PRIMARY KEY,
+	agent_id TEXT NOT NULL,
+	op TEXT NOT NULL,
+	params_json TEXT,
+	state TEXT NOT NULL DEFAULT 'QUEUED',
+	result_json TEXT,
+	error TEXT,
+	created_at TEXT NOT NULL,
+	delivered_at TEXT,
+	completed_at TEXT,
+	FOREIGN KEY(agent_id) REFERENCES agents(agent_id) ON DELETE CASCADE
+);
+CREATE INDEX idx_agent_commands_pending ON agent_commands(agent_id, state, created_at);
+`},
+		{Version: 4, Name: "fleet_rollouts", SQL: `
+CREATE TABLE fleet_rollouts (
+	rollout_id TEXT PRIMARY KEY,
+	target_group TEXT NOT NULL,
+	op TEXT NOT NULL,
+	params_json TEXT,
+	batch_size INTEGER NOT NULL,
+	max_failures INTEGER NOT NULL,
+	state TEXT NOT NULL DEFAULT 'RUNNING',
+	total_targets INTEGER NOT NULL,
+	completed_targets INTEGER NOT NULL DEFAULT 0,
+	failed_targets INTEGER NOT NULL DEFAULT 0,
+	created_at TEXT NOT NULL,
+	completed_at TEXT
+);
+CREATE TABLE fleet_rollout_targets (
+	rollout_id TEXT NOT NULL,
+	agent_id TEXT NOT NULL,
+	ordinal INTEGER NOT NULL,
+	command_id TEXT,
+	state TEXT NOT NULL DEFAULT 'PENDING',
+	PRIMARY KEY(rollout_id, agent_id),
+	FOREIGN KEY(rollout_id) REFERENCES fleet_rollouts(rollout_id) ON DELETE CASCADE,
+	FOREIGN KEY(agent_id) REFERENCES agents(agent_id) ON DELETE CASCADE
+);
+CREATE INDEX idx_rollout_targets_state ON fleet_rollout_targets(rollout_id, state, ordinal);
+`},
 	}
 }

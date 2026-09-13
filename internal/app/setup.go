@@ -113,8 +113,10 @@ func RunSetup(ctx context.Context, configPath string) error {
 		}
 		fmt.Println("config written")
 	}
-	fmt.Println("\nNext: create your admin user:")
-	fmt.Println("  FYRWALL_ADMIN_PASSWORD='a-long-random-password' sudo -E fyrwall user create-admin")
+	fmt.Println("\nSetup complete. Open the web UI in your browser:")
+	fmt.Printf("  http://%s:%d\n", cfg.Server.Bind, cfg.Server.Port)
+	fmt.Println("First run: the GUI walks you through creating the super admin")
+	fmt.Println("account and its password - no CLI step needed.")
 	return nil
 }
 

@@ -22,6 +22,7 @@ import (
 	"github.com/PotenFYR-Studios/FYRwall/internal/diagnostics"
 	"github.com/PotenFYR-Studios/FYRwall/internal/firewall"
 	"github.com/PotenFYR-Studios/FYRwall/internal/health"
+	"github.com/PotenFYR-Studios/FYRwall/internal/pki"
 	"github.com/PotenFYR-Studios/FYRwall/internal/secureconfig"
 	"github.com/PotenFYR-Studios/FYRwall/internal/version"
 	"github.com/PotenFYR-Studios/FYRwall/webembed"
@@ -36,22 +37,25 @@ type Server struct {
 	users    *database.UserRepo
 	audit    *database.AuditRepo
 	notifs   *database.NotificationRepo
+	fleet    *database.FleetRepo
 	health   *health.Tracker
 	firewall *firewall.Manager
 	diag     *diagnostics.Registry
 	sessions *auth.SessionManager
 	limiter  *auth.LoginRateLimiter
+	agentPKI *pki.Manager
 }
 
 // New builds the API server.
-func New(cfg *config.Config, log zerolog.Logger, db *database.DB, fw *firewall.Manager, ht *health.Tracker, diag *diagnostics.Registry) *Server {
-	return &Server{
+func New(cfg *config.Config, log zerolog.Logger, db *database.DB, fw *firewall.Manager, ht *health.Tracker, diag *diagnostics.Registry, issuers ...*pki.Manager) *Server {
+	s := &Server{
 		cfg:      cfg,
 		log:      log,
 		db:       db,
 		users:    database.NewUserRepo(db),
 		audit:    database.NewAuditRepo(db),
 		notifs:   database.NewNotificationRepo(db),
+		fleet:    database.NewFleetRepo(db),
 		health:   ht,
 		firewall: fw,
 		diag:     diag,
@@ -61,6 +65,10 @@ func New(cfg *config.Config, log zerolog.Logger, db *database.DB, fw *firewall.M
 		),
 		limiter: auth.NewLoginRateLimiter(cfg.Security.LoginRateLimitPerMinute),
 	}
+	if len(issuers) > 0 {
+		s.agentPKI = issuers[0]
+	}
+	return s
 }
 
 // Router assembles the middleware chain and all routes.
@@ -98,9 +106,15 @@ func (s *Server) Router() http.Handler {
 	// Public: health (unauthenticated, minimal data) + version.
 	r.Get("/api/v1/version", handleVersion)
 	r.Get("/api/v1/system/health", s.handleHealth)
+	r.Get("/api/v1/setup/status", s.handleSetupStatus)
+	r.Post("/api/v1/setup/super-admin", s.handleSetupSuperAdmin)
 	r.Post("/api/v1/auth/login", s.handleLogin)
 	r.Post("/api/v1/auth/logout", s.handleLogout)
 	r.Get("/api/v1/auth/me", s.handleMe)
+	r.Post("/api/v1/agent/enroll", s.handleAgentEnroll)
+	r.Post("/api/v1/agent/poll", s.handleAgentPoll)
+	r.Post("/api/v1/agent/result", s.handleAgentResult)
+	r.Post("/api/v1/agent/rotate-certificate", s.handleAgentCertificateRotate)
 
 	// Authenticated API.
 	r.Route("/api/v1", func(r chi.Router) {
@@ -122,6 +136,16 @@ func (s *Server) Router() http.Handler {
 		r.With(s.requirePerm(auth.PermDiagnosticsRun)).Get("/system/diagnostics", s.handleDiagnostics)
 		r.With(s.requirePerm(auth.PermLogsRead)).Get("/audit", s.handleAuditList)
 		r.Get("/notifications", s.handleNotificationsList)
+		r.With(s.requirePerm(auth.PermUsersManage)).Post("/agents/enrollment-tokens", s.handleEnrollmentTokenCreate)
+		r.With(s.requirePerm(auth.PermFirewallRead)).Get("/agents", s.handleAgentsList)
+		r.With(s.requirePerm(auth.PermFirewallRead)).Get("/agents/{agentID}/firewall/status", s.handleRemoteFirewallStatus)
+		r.With(s.requirePerm(auth.PermFirewallRead)).Get("/agents/{agentID}/firewall/rules", s.handleRemoteFirewallRules)
+		r.With(s.requirePerm(auth.PermFirewallApply)).Post("/agents/{agentID}/firewall/transactions", s.handleRemoteFirewallApply)
+		r.With(s.requirePerm(auth.PermFirewallApply)).Post("/agents/{agentID}/commands", s.handleAgentCommandCreate)
+		r.With(s.requirePerm(auth.PermFirewallRead)).Get("/agent-commands/{commandID}", s.handleAgentCommandGet)
+		r.With(s.requirePerm(auth.PermFirewallApply)).Post("/agent-groups/{group}/rollouts", s.handleRolloutCreate)
+		r.With(s.requirePerm(auth.PermFirewallRead)).Get("/rollouts/{rolloutID}", s.handleRolloutGet)
+		r.With(s.requirePerm(auth.PermUsersManage)).Delete("/agents/{agentID}", s.handleAgentRevoke)
 	})
 
 	return r
@@ -129,7 +153,7 @@ func (s *Server) Router() http.Handler {
 
 // securityHeaders applies the hardening headers from spec section 35.
 func securityHeaders(cfg *config.Config) func(http.Handler) http.Handler {
-	csp := "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; " +
+	csp := "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; " +
 		"connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

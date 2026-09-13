@@ -44,10 +44,13 @@ RUN apk add --no-cache ca-certificates iptables ip6tables \
     && addgroup -S fyrwall \
     && adduser -S -G fyrwall -h /var/lib/fyrwall fyrwall \
     && install -d -m 0750 -o fyrwall -g fyrwall /var/lib/fyrwall /var/log/fyrwall \
-    && install -d -m 0750 -o root -g fyrwall /run/fyrwall /etc/fyrwall
+    && install -d -m 0750 -o root -g fyrwall /run/fyrwall \
+    && install -d -m 0770 -o root -g fyrwall /etc/fyrwall
 
 COPY --from=build /out/fyrwall /usr/local/bin/fyrwall
 COPY packaging/config.example.yaml /etc/fyrwall/config.yaml
+RUN chown root:fyrwall /etc/fyrwall/config.yaml \
+    && chmod 0660 /etc/fyrwall/config.yaml
 
 # OCI license label (fix-round-2 W4).
 LABEL org.opencontainers.image.licenses="Apache-2.0 WITH Commons-Clause-1.0"

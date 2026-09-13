@@ -71,7 +71,7 @@ install -d -m 0750 -o root  -g fyrwall /var/lib/fyrwall/backups
 install -d -m 0750 -o root  -g fyrwall /var/lib/fyrwall/restore-points
 install -d -m 0750 -o fyrwall -g fyrwall /var/log/fyrwall
 install -d -m 0750 -o root  -g fyrwall /run/fyrwall
-install -d -m 0750 -o root  -g fyrwall /etc/fyrwall
+install -d -m 0770 -o root  -g fyrwall /etc/fyrwall
 
 echo "[3/7] Installing binary"
 # 1. Local tarball extract (air-gapped installs) or 2. dist/ build output.
@@ -132,9 +132,9 @@ if [ -n "${BIN_TMP:-}" ]; then rm -rf "$BIN_TMP"; fi
 echo "[4/7] Installing config (existing config is never overwritten)"
 if [ ! -f /etc/fyrwall/config.yaml ]; then
   if [ -f "fyrwall_${VERSION}_linux_${GOARCH}/config.example.yaml" ]; then
-    install -m 0640 -o root -g fyrwall "fyrwall_${VERSION}_linux_${GOARCH}/config.example.yaml" /etc/fyrwall/config.yaml
+    install -m 0660 -o root -g fyrwall "fyrwall_${VERSION}_linux_${GOARCH}/config.example.yaml" /etc/fyrwall/config.yaml
   elif [ -f packaging/config.example.yaml ]; then
-    install -m 0640 -o root -g fyrwall packaging/config.example.yaml /etc/fyrwall/config.yaml
+    install -m 0660 -o root -g fyrwall packaging/config.example.yaml /etc/fyrwall/config.yaml
   fi
 fi
 
@@ -179,11 +179,10 @@ Installation complete.
   Version:  $VERSION
 
 Next steps:
-  1. Set an admin password and bootstrap:
-       FYRWALL_ADMIN_PASSWORD='choose-a-long-random-password' sudo -E fyrwall user create-admin
-  2. Start services (optional, only if you want them now):
+  1. Start services (optional, only if you want them now):
        systemctl enable --now fyrwall-agent fyrwall-server
-  3. Open http://127.0.0.1:7443 and log in.
+  2. Open http://127.0.0.1:7443: the one-time setup wizard creates the
+     super admin account and its password in the browser.
 
 This installer never touched your firewall rules.
 EOF

@@ -39,6 +39,7 @@ type Config struct {
 	RestorePoints RestorePointsConfig `yaml:"restore_points"`
 	Security      SecurityConfig      `yaml:"security"`
 	Updates       UpdatesConfig       `yaml:"updates"`
+	Agent         AgentConfig         `yaml:"agent"`
 }
 
 type ServerConfig struct {
@@ -60,9 +61,10 @@ type ServerConfig struct {
 }
 
 type TLSConfig struct {
-	Enabled  bool   `yaml:"enabled"`
-	CertFile string `yaml:"cert_file"`
-	KeyFile  string `yaml:"key_file"`
+	Enabled      bool   `yaml:"enabled"`
+	CertFile     string `yaml:"cert_file"`
+	KeyFile      string `yaml:"key_file"`
+	ClientCAFile string `yaml:"-"`
 }
 
 type DatabaseConfig struct {
@@ -108,6 +110,17 @@ type SecurityConfig struct {
 	LoginRateLimitPerMinute   int `yaml:"login_rate_limit_per_minute"`
 }
 
+type AgentConfig struct {
+	ServerURL       string   `yaml:"server_url"`
+	EnrollmentToken string   `yaml:"enrollment_token"`
+	CredentialFile  string   `yaml:"credential_file"`
+	IDFile          string   `yaml:"id_file"`
+	DisplayName     string   `yaml:"display_name"`
+	Labels          []string `yaml:"labels"`
+	Groups          []string `yaml:"groups"`
+	Site            string   `yaml:"site"`
+}
+
 // Default returns the spec-default configuration (loopback bind).
 func Default() *Config {
 	return &Config{
@@ -139,6 +152,7 @@ func Default() *Config {
 			ManifestURL:        "https://potenfyr-studios.github.io/FYRwall/updates.json",
 			CheckIntervalHours: 24,
 		},
+		Agent: AgentConfig{CredentialFile: "/var/lib/fyrwall/agent-credential.json", IDFile: "/var/lib/fyrwall/agent-id"},
 	}
 }
 
@@ -148,6 +162,17 @@ func Default() *Config {
 // decrypted transparently; plaintext configs are migrated to encrypted
 // on first load.
 func Load(configPath string) (*Config, error) {
+	return load(configPath, true)
+}
+
+// LoadAgent reads the same configuration without migrating plaintext. The
+// privileged agent starts before the unprivileged server, so it must not create
+// a root-only config key that would lock the server out on first boot.
+func LoadAgent(configPath string) (*Config, error) {
+	return load(configPath, false)
+}
+
+func load(configPath string, migratePlaintext bool) (*Config, error) {
 	if configPath != "" {
 		loadedPath = configPath
 	} else {
@@ -155,7 +180,7 @@ func Load(configPath string) (*Config, error) {
 	}
 	cfg := Default()
 	if configPath != "" {
-		b, err := readConfigFile(configPath)
+		b, err := readConfigFile(configPath, migratePlaintext)
 		if err == nil {
 			if len(b) > 0 {
 				if err := yaml.Unmarshal(b, cfg); err != nil {
@@ -223,6 +248,18 @@ func (c *Config) applyEnv() {
 	}
 	if v := os.Getenv("FYRWALL_DOMAIN"); v != "" {
 		c.Server.Domain = v
+	}
+	if v := os.Getenv("FYRWALL_AGENT_SERVER_URL"); v != "" {
+		c.Agent.ServerURL = strings.TrimRight(v, "/")
+	}
+	if v := os.Getenv("FYRWALL_AGENT_ENROLLMENT_TOKEN"); v != "" {
+		c.Agent.EnrollmentToken = v
+	}
+	if v := os.Getenv("FYRWALL_AGENT_CREDENTIAL_FILE"); v != "" {
+		c.Agent.CredentialFile = v
+	}
+	if v := os.Getenv("FYRWALL_AGENT_ID_FILE"); v != "" {
+		c.Agent.IDFile = v
 	}
 }
 
@@ -314,6 +351,11 @@ func (c *Config) Validate() error {
 	if c.Security.SessionIdleTimeoutMinutes < 1 {
 		return fmt.Errorf("security.session_idle_timeout_minutes must be >= 1")
 	}
+	if c.Agent.ServerURL != "" && !strings.HasPrefix(c.Agent.ServerURL, "https://") {
+		if !strings.HasPrefix(c.Agent.ServerURL, "http://127.0.0.1") && !strings.HasPrefix(c.Agent.ServerURL, "http://localhost") && os.Getenv("FYRWALL_ALLOW_INSECURE_AGENT") != "true" {
+			return fmt.Errorf("agent.server_url requires https (or FYRWALL_ALLOW_INSECURE_AGENT=true for trusted development networks)")
+		}
+	}
 	// SQLite parent dir must be writable by the service account.
 	if strings.EqualFold(c.Database.Driver, "sqlite") {
 		dir := filepath.Dir(c.Database.SQLitePath)
@@ -330,7 +372,7 @@ func (c *Config) Validate() error {
 // readConfigFile reads config bytes, transparently decrypting an
 // encrypted config via secureconfig (which also migrates legacy
 // plaintext configs on first load).
-func readConfigFile(configPath string) ([]byte, error) {
+func readConfigFile(configPath string, migratePlaintext bool) ([]byte, error) {
 	raw, err := os.ReadFile(configPath)
 	if err != nil {
 		return nil, err
@@ -341,6 +383,9 @@ func readConfigFile(configPath string) ([]byte, error) {
 			return nil, err
 		}
 		return sc.Load()
+	}
+	if !migratePlaintext {
+		return raw, nil
 	}
 	// Plaintext: migrate to encrypted if the directory is writable;
 	// read-only fallback (containers, non-root CLI) just uses plaintext.

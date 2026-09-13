@@ -14,10 +14,10 @@ tests/run-server.sh --no-build       # reuse the binary from the last run
 tests/run-server.sh --rebuild-frontend
 ```
 
-On first run (empty database) an `admin` user is bootstrapped and its
-random password printed once. Set `FYRWALL_ADMIN_PASSWORD` to choose your
-own (policy: 14+ chars with upper, lower, digit and special). Delete
-`tests/.tmp/` for a factory reset.
+On first run (empty database) the web GUI opens the one-time super admin
+setup wizard: choose the admin username and password there (policy: 14+
+chars with upper, lower, digit and special). Delete `tests/.tmp/` for a
+factory reset.
 
 > The web GUI lives in the Go binary via `webembed/dist`. That directory's
 > contents are gitignored, so **any** Go-only build (without the frontend

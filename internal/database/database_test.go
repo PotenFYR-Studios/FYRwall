@@ -31,8 +31,8 @@ func TestSQLiteOpenAndMigrate(t *testing.T) {
 	if err := db.SQL().QueryRow("SELECT COUNT(*) FROM schema_migrations").Scan(&n); err != nil {
 		t.Fatal(err)
 	}
-	if n != 2 {
-		t.Fatalf("expected 2 migrations recorded, got %d", n)
+	if n != len(Schema()) {
+		t.Fatalf("expected %d migrations recorded, got %d", len(Schema()), n)
 	}
 }
 

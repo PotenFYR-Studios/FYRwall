@@ -81,9 +81,16 @@ Built by **PotenFYR Studios**.
 - Embedded into the Go binary at build time; the production host needs no Node.js
 
 ### Agent
-- Unprivileged Unix-socket server at `/run/fyrwall/agent.sock` (0660)
+- Narrow privileged Unix-socket service at `/run/fyrwall/agent.sock` (0660); web server remains unprivileged
 - Strictly allowlisted typed operations; unknown operations are rejected and logged
 - Per-connection deadlines and bounded request sizes
+- Single-use remote enrollment tokens and hashed per-agent credentials
+- mTLS client certificates with automatic rotation and per-agent revocation
+- Outbound restart-safe long polling; no inbound management ports on targets
+- Ordered state revisions, drift hashes, durable commands, result retry, and reconnect reconciliation
+- Fleet inventory, labels, groups, site metadata, health, backend ownership, and policy revisions
+- Staged group rollouts with configurable batch size and failure budget
+- Remote command progress plus per-target and group emergency rollback
 
 ---
 
@@ -208,8 +215,6 @@ cd web && bun install && bun run build   # typecheck (tsc) + vite build
 # config with a writable sqlite path
 FYRWALL_DB_SQLITE_PATH=./fyrwall.db ./fyrwall server --config config.yaml
 
-# set the admin password via env, never argv
-FYRWALL_ADMIN_PASSWORD='a-long-random-password' ./fyrwall user create-admin
 ./fyrwall doctor                 # read-only diagnostics
 ./fyrwall preflight              # diagnostics + backend detection
 ./fyrwall status                 # firewall + ownership summary
@@ -221,8 +226,10 @@ The UI listens on `127.0.0.1:7443` by default. A non-loopback bind without TLS i
 
 1. The server runs preflight, detects the platform and firewall backend, opens the database, and applies migrations.
 2. Ownership is resolved. Multiple active managers puts FYRwall in DEGRADED with writes blocked and a persistent critical notification.
-3. Create the first admin with `fyrwall user create-admin` (password from the environment).
-4. Log in at `http://127.0.0.1:7443`; the UI issues a CSRF token automatically.
+3. Open `http://127.0.0.1:7443`: on a fresh install the one-time setup wizard
+   creates the super admin account and its password right in the browser
+   (works the same for Docker - there is no CLI password step).
+4. Sign in; the UI issues a CSRF token automatically.
 
 ### Configuration
 
@@ -259,7 +266,7 @@ security:
   login_rate_limit_per_minute: 5
 ```
 
-Environment overrides: `FYRWALL_SERVER_BIND`, `FYRWALL_SERVER_PORT`, `FYRWALL_DB_SQLITE_PATH`, `FYRWALL_LOG_LEVEL`, `FYRWALL_FIREWALL_BACKEND`, `FYRWALL_TLS_ENABLED`, `FYRWALL_TLS_CERT`, `FYRWALL_TLS_KEY`, `FYRWALL_SAFE_APPLY_TIMEOUT`, `FYRWALL_ALLOW_INSECURE_BIND`, `FYRWALL_ADMIN_PASSWORD`.
+Environment overrides: `FYRWALL_SERVER_BIND`, `FYRWALL_SERVER_PORT`, `FYRWALL_DB_SQLITE_PATH`, `FYRWALL_LOG_LEVEL`, `FYRWALL_FIREWALL_BACKEND`, `FYRWALL_TLS_ENABLED`, `FYRWALL_TLS_CERT`, `FYRWALL_TLS_KEY`, `FYRWALL_SAFE_APPLY_TIMEOUT`, `FYRWALL_ALLOW_INSECURE_BIND`.
 
 Validate with `./fyrwall config validate --config your.yaml`.
 
@@ -269,7 +276,7 @@ Validate with `./fyrwall config validate --config your.yaml`.
 
 All endpoints are versioned under `/api/v1`. JSON envelope with machine-readable error codes (`FW_BACKEND_CONFLICT`, `FW_VALIDATION_FAILED`, `AUTH_RATE_LIMITED`, and friends).
 
-Public: `GET /version`, `GET /system/health`, `POST /auth/login`, `POST /auth/logout`, `GET /auth/me`
+Public: `GET /version`, `GET /system/health`, `GET /setup/status`, `POST /setup/super-admin` (first run only), `POST /auth/login`, `POST /auth/logout`, `GET /auth/me`
 
 Authenticated (session + CSRF required):
 - `GET /firewall/status`, `GET /firewall/rules`
@@ -278,6 +285,9 @@ Authenticated (session + CSRF required):
 - `GET /users`, `POST /users`
 - `GET /system/diagnostics`
 - `GET /audit`, `GET /notifications`
+- `GET /agents`, `POST /agents/enrollment-tokens`
+- `GET /agents/{id}/firewall/status`, `GET /agents/{id}/firewall/rules`
+- `POST /agents/{id}/firewall/transactions`, `POST /agents/{id}/commands`
 
 RBAC is enforced per route: viewers read, operators apply, admins manage users and settings, auditors get the audit trail.
 
@@ -288,12 +298,12 @@ RBAC is enforced per route: viewers read, operators apply, admins manage users a
 ```
 fyrwall server              run the web/API server (unprivileged)
 fyrwall agent               run the local firewall agent (Unix socket)
+fyrwall agent --server URL  enroll/synchronize with a central server
 fyrwall status              firewall and ownership summary
 fyrwall doctor              read-only diagnostics
 fyrwall preflight           diagnostics + backend detection
 fyrwall config validate     validate a config file
 fyrwall db migrate          apply pending migrations
-fyrwall user create-admin   bootstrap the first admin (password via env)
 fyrwall restore list        list restore points
 fyrwall restore create      create a manual restore point
 fyrwall service status      show detected init system
@@ -304,7 +314,7 @@ fyrwall version             print build info
 
 ## Docker
 
-Run the server in a container; pair with the host-networked agent sidecar for real firewall control:
+Run the server and preview the intended host-agent topology:
 
 ```bash
 # Server only (UI + API)
@@ -313,11 +323,14 @@ docker run -d --name fyrwall \
   -v fyrwall-data:/var/lib/fyrwall \
   ghcr.io/potenfyr-studios/fyrwall:latest
 
-# Server + bridged host agent (recommended)
+# Server + co-located host agent topology
 docker compose up -d
 ```
 
-How agents reach the server: agents dial OUT to the server (no inbound ports on managed hosts). Across networks, publish 7443 behind TLS and set `server.domain`; inside Docker networks agents use `server:7443`. The agent sidecar uses host networking + NET_ADMIN because containers cannot see host firewall namespaces - the typed socket API keeps it safe. Full guide: [docs/content/docker.md](docs/content/docker.md).
+The server consumes the agent's typed Unix socket; only the sidecar gets the
+host namespace and firewall capabilities. Remote agents dial out through
+authenticated, restart-safe long-poll sessions, requiring no inbound management
+port on targets. Full guide: [docs/content/docker.md](docs/content/docker.md).
 
 ## Updating
 
@@ -360,7 +373,7 @@ Same version, new commits = refreshed builds and changelog build-lines, no new r
                            | Unix socket 0660, typed ops only
                            v
   +--------------------------------------------------+
-  |    fyrwall-agent (unprivileged) + priv helper    |
+  |        fyrwall-agent (narrow root boundary)      |
   |    UFW adapter | iptables (legacy/nft) adapters  |
   |    ownership detection | conflict engine         |
   +------------------------+-------------------------+
@@ -369,7 +382,11 @@ Same version, new commits = refreshed builds and changelog build-lines, no new r
              Linux netfilter (iptables/nftables)
 ```
 
-Agents on other hosts dial out to the server over mTLS-style enrollment; discovery is opt-in and scope-limited.
+Agents on managed targets dial out through authenticated, restart-safe sessions
+for near-realtime state, drift detection, health, inventory, policy operations,
+and centralized audit. A co-located agent makes the central server host another
+managed target. Single-use enrollment tokens, durable command delivery,
+sequence reconciliation, and persisted results handle reconnects safely.
 
 ## Extensions
 

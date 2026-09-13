@@ -3,10 +3,10 @@
 ## Privilege separation
 
 - fyrwall-server: unprivileged. Never runs firewall commands.
-- fyrwall-agent: unprivileged. Collects state and events.
-- Privileged helper: tiny root daemon, Unix socket 0660, strictly
-  allowlisted typed operations, revalidates every request, SO_PEERCRED
-  peer checks. No generic exec API exists anywhere.
+- fyrwall-agent: narrow root service with only NET_ADMIN/NET_RAW capabilities.
+  Accepts typed allowlisted operations; no generic command or shell endpoint.
+- Agent socket: Unix socket 0660 in a root-owned, service-group 0750 directory, strictly
+  allowlisted typed operations. No generic exec API exists anywhere.
 
 ## Authentication
 
@@ -17,7 +17,9 @@ limiting, session revocation on password change.
 ## Transport
 
 TLS 1.2+ when enabled; security headers always (CSP frame-ancestors
-none, nosniff, no-referrer). Agent traffic is mutually authenticated.
+none, nosniff, no-referrer). Remote agent traffic uses mTLS client certificates
+plus per-agent bearer credentials. Certificates rotate automatically and are
+individually revocable; raw credentials stay on agents and server stores hashes.
 Domain binding rejects foreign Host headers.
 
 ## Logs are protected

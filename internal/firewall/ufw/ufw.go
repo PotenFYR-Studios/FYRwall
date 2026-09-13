@@ -81,6 +81,11 @@ func (b *Backend) ListRules(ctx context.Context) ([]firewall.Rule, error) {
 // Validate runs static validation plus conflict analysis. UFW itself has no
 // dry-run; structural validation happens in the shared engine.
 func (b *Backend) Validate(ctx context.Context, tx firewall.Transaction) firewall.ValidationResult {
+	for _, action := range tx.Actions {
+		if action.Op != "add" && action.Op != "update" && action.Op != "delete" {
+			return firewall.ValidationResult{Valid: false, Errors: []string{"UFW supports add, update, and delete transactions"}}
+		}
+	}
 	rules, err := b.ListRules(ctx)
 	if err != nil {
 		return firewall.ValidationResult{Valid: false, Errors: []string{err.Error()}}
@@ -120,9 +125,14 @@ func (b *Backend) Apply(ctx context.Context, tx firewall.Transaction) (firewall.
 		}
 		applied++
 	}
+	out, err := exec.Run(ctx, 15*time.Second, b.bin, "status", "verbose")
+	if err != nil {
+		return firewall.ApplyResult{TxnID: tx.ID, Applied: applied}, err
+	}
+	stateHash := hashSnapshot(firewall.Snapshot{UFWStatus: out.Stdout})
 	return firewall.ApplyResult{
 		TxnID: tx.ID, Applied: applied,
-		DurationMs: time.Since(start).Milliseconds(), Warnings: warnings,
+		StateHash: stateHash, DurationMs: time.Since(start).Milliseconds(), Warnings: warnings,
 	}, nil
 }
 
@@ -133,11 +143,19 @@ func (b *Backend) applyAction(ctx context.Context, a firewall.TxnAction) error {
 		if r == nil {
 			return fmt.Errorf("add/update action without rule")
 		}
-		spec, err := toUFWSpec(r)
+		args, err := toUFWArgs(r)
 		if err != nil {
 			return err
 		}
-		out, err := exec.Run(ctx, 30*time.Second, b.bin, spec)
+		if a.Op == "update" {
+			if a.RuleID == "" {
+				return fmt.Errorf("update action requires backend rule ID")
+			}
+			if out, delErr := exec.Run(ctx, 30*time.Second, b.bin, "delete", a.RuleID); delErr != nil {
+				return fmt.Errorf("%w: ufw update delete: %s", firewall.ErrCommandFailed, firstLine(out.Stderr))
+			}
+		}
+		out, err := exec.Run(ctx, 30*time.Second, b.bin, args...)
 		if err != nil {
 			return fmt.Errorf("%w: ufw %s: %s", firewall.ErrCommandFailed, a.Op, firstLine(out.Stderr))
 		}
@@ -151,11 +169,11 @@ func (b *Backend) applyAction(ctx context.Context, a firewall.TxnAction) error {
 			return nil
 		}
 		if a.Rule != nil {
-			spec, err := toUFWSpec(a.Rule)
+			args, err := toUFWArgs(a.Rule)
 			if err != nil {
 				return err
 			}
-			out, err := exec.Run(ctx, 30*time.Second, b.bin, "delete", spec)
+			out, err := exec.Run(ctx, 30*time.Second, b.bin, append([]string{"delete"}, args...)...)
 			if err != nil {
 				return fmt.Errorf("%w: ufw delete: %s", firewall.ErrCommandFailed, firstLine(out.Stderr))
 			}
@@ -169,6 +187,11 @@ func (b *Backend) applyAction(ctx context.Context, a firewall.TxnAction) error {
 
 // toUFWSpec converts a normalized rule to the UFW CLI grammar.
 func toUFWSpec(r *firewall.Rule) (string, error) {
+	args, err := toUFWArgs(r)
+	return strings.Join(args, " "), err
+}
+
+func toUFWArgs(r *firewall.Rule) ([]string, error) {
 	var parts []string
 	switch r.Direction {
 	case firewall.DirIn:
@@ -216,7 +239,7 @@ func toUFWSpec(r *firewall.Rule) (string, error) {
 	if r.DestinationPort != "" {
 		parts = append(parts, "port", r.DestinationPort)
 	}
-	return strings.Join(parts, " "), nil
+	return parts, nil
 }
 
 // Verify compares expected state hash against fresh UFW output.
@@ -271,19 +294,7 @@ func (b *Backend) Restart(ctx context.Context) error {
 }
 
 func restoreIptables(ctx context.Context, bin, content string) error {
-	// iptables-restore reads rules from stdin; we pass via a temp file to
-	// avoid shell pipes entirely (spec section 43: no shell).
-	tmp, err := os.CreateTemp("", "fyrwall-restore-*.rules")
-	if err != nil {
-		return err
-	}
-	defer os.Remove(tmp.Name())
-	if _, err := tmp.WriteString(content); err != nil {
-		tmp.Close()
-		return err
-	}
-	tmp.Close()
-	out, err := exec.Run(ctx, 60*time.Second, bin, tmp.Name())
+	out, err := exec.RunInput(ctx, 60*time.Second, content, bin)
 	if err != nil {
 		return fmt.Errorf("%w: %s: %s", firewall.ErrCommandFailed, bin, firstLine(out.Stderr))
 	}
@@ -351,7 +362,8 @@ func parseStatusNumbered(out string) ([]firewall.Rule, error) {
 		if closeIdx < 0 {
 			continue
 		}
-		if _, err := strconv.Atoi(strings.TrimSpace(line[1:closeIdx])); err != nil {
+		backendNumber, err := strconv.Atoi(strings.TrimSpace(line[1:closeIdx]))
+		if err != nil {
 			continue // v6 block header "[ N]" after comment marker is still a rule line; non-numeric is a section separator
 		}
 		rest := strings.Fields(line[closeIdx+1:])
@@ -359,7 +371,7 @@ func parseStatusNumbered(out string) ([]firewall.Rule, error) {
 			continue
 		}
 		rule := firewall.Rule{
-			ID: firewall.NewRuleID(), Backend: "ufw",
+			ID: firewall.NewRuleID(), BackendID: strconv.Itoa(backendNumber), Backend: "ufw",
 			Enabled: true, Priority: priority,
 			CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC(),
 		}

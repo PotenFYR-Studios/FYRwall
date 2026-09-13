@@ -13,6 +13,7 @@ package exec
 import (
 	"context"
 	"fmt"
+	"io"
 	"os/exec"
 	"strings"
 	"time"
@@ -44,6 +45,18 @@ type Result struct {
 // name may be an absolute path or a bare name resolved via LookPath
 // (LookPath only finds executables in the fixed minimal PATH above).
 func Run(ctx context.Context, timeout time.Duration, name string, args ...string) (*Result, error) {
+	return run(ctx, timeout, name, nil, args...)
+}
+
+// RunInput executes a fixed binary with bounded string input on stdin.
+func RunInput(ctx context.Context, timeout time.Duration, input, name string, args ...string) (*Result, error) {
+	if len(input) > MaxOutputBytes {
+		return nil, fmt.Errorf("stdin exceeds %d bytes", MaxOutputBytes)
+	}
+	return run(ctx, timeout, name, strings.NewReader(input), args...)
+}
+
+func run(ctx context.Context, timeout time.Duration, name string, stdin io.Reader, args ...string) (*Result, error) {
 	if timeout <= 0 {
 		timeout = DefaultTimeout
 	}
@@ -58,6 +71,7 @@ func Run(ctx context.Context, timeout time.Duration, name string, args ...string
 	start := time.Now()
 	cmd := exec.CommandContext(ctx, bin, args...)
 	cmd.Env = minimalEnv
+	cmd.Stdin = stdin
 	// Use ExistingHelperError wrappers nowhere; plain exec buffers are
 	// capped by draining into a limiter below.
 	var out limitedBuffer

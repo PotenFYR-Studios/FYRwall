@@ -109,3 +109,18 @@ func TestParseSave6Family(t *testing.T) {
 		t.Errorf("family = %s", rules[0].Family)
 	}
 }
+
+func TestRuleToArgsUsesValidInsertAndPorts(t *testing.T) {
+	r := &firewall.Rule{ID: "web", Direction: firewall.DirIn, Action: firewall.ActionAllow, Protocol: firewall.ProtoTCP, DestinationPort: "80,443"}
+	args, err := ruleToArgs(r, "add")
+	if err != nil {
+		t.Fatal(err)
+	}
+	joined := strings.Join(args, " ")
+	if !strings.HasPrefix(joined, "-I INPUT 1 ") {
+		t.Fatalf("invalid insert argv: %q", joined)
+	}
+	if !strings.Contains(joined, "-m multiport --dports 80,443") {
+		t.Fatalf("missing multiport match: %q", joined)
+	}
+}

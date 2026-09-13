@@ -70,6 +70,9 @@ func TestParseStatusNumbered(t *testing.T) {
 		t.Fatalf("expected 7 rules, got %d", len(rules))
 	}
 	r1 := rules[0]
+	if r1.BackendID != "1" {
+		t.Errorf("backend ID = %q", r1.BackendID)
+	}
 	if r1.Action != firewall.ActionAllow || r1.Direction != firewall.DirIn {
 		t.Errorf("rule 1 = %s/%s", r1.Action, r1.Direction)
 	}
@@ -96,6 +99,17 @@ func TestParseStatusNumbered(t *testing.T) {
 	}
 	if !strings.Contains(rules[6].Comment, "web-front") {
 		t.Errorf("rule 7 comment = %q", rules[6].Comment)
+	}
+}
+
+func TestToUFWArgsAreSeparate(t *testing.T) {
+	r := &firewall.Rule{Direction: firewall.DirIn, Action: firewall.ActionAllow, Protocol: firewall.ProtoTCP, DestinationPort: "443"}
+	args, err := toUFWArgs(r)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(args) < 2 || args[0] != "allow" || args[len(args)-1] != "443" {
+		t.Fatalf("unexpected argv: %#v", args)
 	}
 }
 

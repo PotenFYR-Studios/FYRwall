@@ -15,14 +15,15 @@ import (
 type Manager struct {
 	mu sync.Mutex // serializes mutations; reads are lock-free
 
-	snapshots map[string]Snapshot
-	backend   FirewallBackend
-	ownership OwnershipReport
-	lastHash  string
-	lastRead  time.Time
-	lastWrite time.Time
-	auditFn   func(event AuditEvent)
-	notifyFn  func(event IssueEvent)
+	snapshots    map[string]Snapshot
+	backend      FirewallBackend
+	ownership    OwnershipReport
+	lastHash     string
+	lastRead     time.Time
+	lastWrite    time.Time
+	lastSnapshot *Snapshot
+	auditFn      func(event AuditEvent)
+	notifyFn     func(event IssueEvent)
 }
 
 // AuditEvent is the minimal audit callback contract; the audit service
@@ -72,6 +73,7 @@ func (m *Manager) Ownership() OwnershipReport {
 
 // Status returns backend status, guarded by ownership policy.
 func (m *Manager) Status(ctx context.Context) (FirewallStatus, error) {
+	m.refreshOwnership(ctx)
 	st, err := m.backend.Status(ctx)
 	if err == nil {
 		m.mu.Lock()
@@ -83,6 +85,7 @@ func (m *Manager) Status(ctx context.Context) (FirewallStatus, error) {
 
 // ListRules reads the active rules.
 func (m *Manager) ListRules(ctx context.Context) ([]Rule, error) {
+	m.refreshOwnership(ctx)
 	rules, err := m.backend.ListRules(ctx)
 	if err == nil {
 		m.mu.Lock()
@@ -96,6 +99,7 @@ func (m *Manager) ListRules(ctx context.Context) ([]Rule, error) {
 // ownership gate, lock, validate, snapshot, apply, re-read, verify, and
 // rollback on any post-snapshot failure.
 func (m *Manager) ApplyTransaction(ctx context.Context, actor string, tx Transaction) (ApplyResult, error) {
+	m.refreshOwnership(ctx)
 	// 1. Ownership gate: writes blocked on conflict/unhealthy state.
 	m.mu.Lock()
 	own := m.ownership
@@ -139,7 +143,7 @@ func (m *Manager) ApplyTransaction(ctx context.Context, actor string, tx Transac
 		// 6. Rollback on failed apply (spec section 19).
 		m.audit(actor, "firewall.apply", tx.ID, false, applyErr.Error())
 		if rbErr := m.restore(ctx, snap); rbErr != nil {
-			m.notifyFn(IssueEvent{
+			m.emit(IssueEvent{
 				Code: "FW_ROLLBACK_FAILED", Severity: "critical", Component: "firewall",
 				Summary:     "Automatic rollback failed after failed apply",
 				Remediation: "Manually restore snapshot " + snap.ID + " and inspect the firewall immediately.",
@@ -153,7 +157,7 @@ func (m *Manager) ApplyTransaction(ctx context.Context, actor string, tx Transac
 	ver, err := m.backend.Verify(ctx, StateHash(res.StateHash))
 	if err != nil || !ver.Match {
 		if rbErr := m.restore(ctx, snap); rbErr != nil {
-			m.notifyFn(IssueEvent{
+			m.emit(IssueEvent{
 				Code: "FW_ROLLBACK_FAILED", Severity: "critical", Component: "firewall",
 				Summary: "Rollback failed after verify mismatch",
 			})
@@ -164,6 +168,7 @@ func (m *Manager) ApplyTransaction(ctx context.Context, actor string, tx Transac
 	res.VerifyResult = &ver
 
 	m.snapshots[snap.ID] = snap
+	m.lastSnapshot = &snap
 	m.lastWrite = time.Now().UTC()
 	m.lastHash = res.StateHash
 	m.audit(actor, "firewall.apply", tx.ID, true,
@@ -237,4 +242,40 @@ func (m *Manager) restore(ctx context.Context, snap Snapshot) error {
 // mutation pipeline (used by the validate endpoint).
 func (m *Manager) BackendValidate(ctx context.Context, tx Transaction) ValidationResult {
 	return m.backend.Validate(ctx, tx)
+}
+
+func (m *Manager) VerifyState(ctx context.Context, expected StateHash) (VerifyResult, error) {
+	return m.backend.Verify(ctx, expected)
+}
+
+func (m *Manager) RestoreSnapshot(ctx context.Context, snap Snapshot) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	return m.restore(ctx, snap)
+}
+
+func (m *Manager) Reload(ctx context.Context) error  { return m.backend.Reload(ctx) }
+func (m *Manager) Restart(ctx context.Context) error { return m.backend.Restart(ctx) }
+
+func (m *Manager) refreshOwnership(ctx context.Context) {
+	provider, ok := m.backend.(interface {
+		OwnershipReport(context.Context) (OwnershipReport, error)
+	})
+	if !ok {
+		return
+	}
+	if ownership, err := provider.OwnershipReport(ctx); err == nil {
+		m.mu.Lock()
+		m.ownership = ownership
+		m.mu.Unlock()
+	}
+}
+
+func (m *Manager) RestoreLast(ctx context.Context) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if m.lastSnapshot == nil {
+		return fmt.Errorf("no successful transaction snapshot available")
+	}
+	return m.restore(ctx, *m.lastSnapshot)
 }

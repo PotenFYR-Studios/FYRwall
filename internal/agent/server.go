@@ -9,7 +9,9 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"os/user"
 	"path/filepath"
+	"strconv"
 	"sync"
 	"time"
 
@@ -45,6 +47,9 @@ var allowedOps = map[string]bool{
 	"ApplyTransaction":     true,
 	"VerifyState":          true,
 	"RestoreSnapshot":      true,
+	"Reload":               true,
+	"Restart":              true,
+	"RestoreLast":          true,
 	"RunAllowedDiagnostic": true,
 }
 
@@ -72,6 +77,14 @@ func (s *Server) Listen(path string) error {
 	if err := os.MkdirAll(filepath.Dir(path), 0o750); err != nil {
 		return fmt.Errorf("socket dir: %w", err)
 	}
+	// Native and container deployments share this boundary with the
+	// unprivileged fyrwall server process.
+	if group, err := user.LookupGroup("fyrwall"); err == nil {
+		if gid, convErr := strconv.Atoi(group.Gid); convErr == nil {
+			_ = os.Chown(filepath.Dir(path), -1, gid)
+			_ = os.Chmod(filepath.Dir(path), 0o750)
+		}
+	}
 	// Remove stale socket from a crashed previous run.
 	os.Remove(path)
 	ln, err := net.Listen("unix", path)
@@ -81,6 +94,14 @@ func (s *Server) Listen(path string) error {
 	if err := os.Chmod(path, 0o660); err != nil {
 		ln.Close()
 		return err
+	}
+	if group, err := user.LookupGroup("fyrwall"); err == nil {
+		if gid, convErr := strconv.Atoi(group.Gid); convErr == nil {
+			if err := os.Chown(path, -1, gid); err != nil {
+				ln.Close()
+				return fmt.Errorf("socket group: %w", err)
+			}
+		}
 	}
 	s.ln = ln
 	return nil
@@ -138,6 +159,7 @@ func (s *Server) dispatch(ctx context.Context, req Request) Response {
 	case "GetCapabilities":
 		return okResp(map[string]any{
 			"backend":    s.mgr.Ownership().Owner,
+			"ownership":  s.mgr.Ownership(),
 			"operations": allowedOpNames(),
 			"protocol":   1,
 		})
@@ -181,6 +203,42 @@ func (s *Server) dispatch(ctx context.Context, req Request) Response {
 			return errResp(err)
 		}
 		return okResp(res)
+	case "VerifyState":
+		var p struct {
+			Expected string `json:"expected"`
+		}
+		if err := json.Unmarshal(req.Params, &p); err != nil {
+			return errResp(err)
+		}
+		res, err := s.mgr.VerifyState(ctx, firewall.StateHash(p.Expected))
+		if err != nil {
+			return errResp(err)
+		}
+		return okResp(res)
+	case "RestoreSnapshot":
+		var snap firewall.Snapshot
+		if err := json.Unmarshal(req.Params, &snap); err != nil {
+			return errResp(err)
+		}
+		if err := s.mgr.RestoreSnapshot(ctx, snap); err != nil {
+			return errResp(err)
+		}
+		return okResp(map[string]bool{"restored": true})
+	case "Reload":
+		if err := s.mgr.Reload(ctx); err != nil {
+			return errResp(err)
+		}
+		return okResp(map[string]bool{"reloaded": true})
+	case "Restart":
+		if err := s.mgr.Restart(ctx); err != nil {
+			return errResp(err)
+		}
+		return okResp(map[string]bool{"restarted": true})
+	case "RestoreLast":
+		if err := s.mgr.RestoreLast(ctx); err != nil {
+			return errResp(err)
+		}
+		return okResp(map[string]bool{"restored": true})
 	case "RunAllowedDiagnostic":
 		// Read-only diagnostics only.
 		return okResp(map[string]any{"supported": true})

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/cookiejar"
 	"net/http/httptest"
@@ -194,4 +195,38 @@ func cookieJarNew() (*cookiejar.Jar, error) { return cookiejar.New(nil) }
 func mustParse(raw string) *url.URL {
 	u, _ := url.Parse(raw)
 	return u
+}
+
+func TestSetupSuperAdminFlow(t *testing.T) {
+	ts := newTestServer(t) // bootstraps an admin, so setup is already done
+
+	// Fresh install detection: admin exists -> setup_needed false.
+	resp, err := http.Get(ts.URL + "/api/v1/setup/status")
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	resp.Body.Close()
+	if resp.StatusCode != 200 {
+		t.Fatalf("setup status: %d", resp.StatusCode)
+	}
+	var st struct {
+		SetupNeeded bool `json:"setup_needed"`
+	}
+	if err := json.Unmarshal(body, &st); err != nil {
+		t.Fatal(err)
+	}
+	if st.SetupNeeded {
+		t.Fatal("setup_needed must be false when an admin exists")
+	}
+
+	// Claiming again must 409.
+	claim, _ := json.Marshal(map[string]string{
+		"username": "root", "password": "LongEnough!A9x", "confirm_password": "LongEnough!A9x",
+	})
+	resp, _ = http.Post(ts.URL+"/api/v1/setup/super-admin", "application/json", bytes.NewReader(claim))
+	resp.Body.Close()
+	if resp.StatusCode != http.StatusConflict {
+		t.Fatalf("expected 409 when setup done, got %d", resp.StatusCode)
+	}
 }

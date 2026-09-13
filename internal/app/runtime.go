@@ -2,6 +2,7 @@ package app
 
 import (
 	"crypto/tls"
+	"crypto/x509"
 	"database/sql"
 	"fmt"
 	"net"
@@ -11,7 +12,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/PotenFYR-Studios/FYRwall/internal/auth"
 	"github.com/PotenFYR-Studios/FYRwall/internal/config"
 	"github.com/PotenFYR-Studios/FYRwall/internal/database"
 	"github.com/PotenFYR-Studios/FYRwall/internal/health"
@@ -39,10 +39,20 @@ func listen(bind string, port int, tlsCfg config.TLSConfig) (netListener, error)
 			ln.Close()
 			return nil, fmt.Errorf("tls load: %w", err)
 		}
-		return tls.NewListener(ln, &tls.Config{
+		tlsConfig := &tls.Config{
 			Certificates: []tls.Certificate{cert},
 			MinVersion:   tls.VersionTLS12,
-		}), nil
+		}
+		if tlsCfg.ClientCAFile != "" {
+			if caPEM, readErr := os.ReadFile(tlsCfg.ClientCAFile); readErr == nil {
+				pool := x509.NewCertPool()
+				if pool.AppendCertsFromPEM(caPEM) {
+					tlsConfig.ClientCAs = pool
+					tlsConfig.ClientAuth = tls.VerifyClientCertIfGiven
+				}
+			}
+		}
+		return tls.NewListener(ln, tlsConfig), nil
 	}
 	return ln, nil
 }
@@ -84,40 +94,6 @@ func recoveryHandler(dbErr error, ht *health.Tracker) http.Handler {
 	return mux
 }
 
-// createAdminIn bootstraps the first admin, refusing if one exists
-// (spec sections 8.8, 46).
-func createAdminIn(db *database.DB) error {
-	users := database.NewUserRepo(db)
-	n, err := users.CountAdmins()
-	if err != nil {
-		return err
-	}
-	if n > 0 {
-		return fmt.Errorf("an enabled administrator already exists; use the web UI to add more")
-	}
-	username := osGetenv("FYRWALL_ADMIN_USERNAME")
-	if username == "" {
-		username = "admin"
-	}
-	password := osGetenv("FYRWALL_ADMIN_PASSWORD")
-	if password == "" {
-		return fmt.Errorf("set FYRWALL_ADMIN_PASSWORD in the environment; never pass passwords on the command line")
-	}
-	if fails := auth.ValidatePasswordDefault(password); len(fails) > 0 {
-		return fmt.Errorf("admin password policy: %s", strings.Join(fails, "; "))
-	}
-	hash, err := hashPassword(password)
-	if err != nil {
-		return err
-	}
-	u, err := users.Create(username, hash, "super_admin", false)
-	if err != nil {
-		return err
-	}
-	fmt.Printf("created administrator %s (%s)\n", u.Username, u.ID)
-	return nil
-}
-
 // restoreList prints stored restore points with pagination guard.
 func restoreList(db *database.DB) error {
 	rows, err := db.SQL().Query(`SELECT id, kind, reason, backend, state_hash, created_at
@@ -135,12 +111,6 @@ func restoreList(db *database.DB) error {
 		fmt.Printf("%s  %-10s %-10s %-14s %s\n", created, kind, backend, stateHash[:12], reason.String)
 	}
 	return rows.Err()
-}
-
-func osGetenv(k string) string { return os.Getenv(k) }
-
-func hashPassword(pw string) (string, error) {
-	return auth.HashPassword(pw, auth.DefaultArgonParams())
 }
 
 // selfIntegrityCheck verifies the running executable against the

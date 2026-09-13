@@ -15,22 +15,24 @@ Web UI: http://127.0.0.1:7443
 The repo ships docker-compose.yml with two services:
 
 - server: the web/API, containerized, no special privileges
-- agent: host-networked with NET_ADMIN, talking to the real host
-  firewall and exposing the typed Unix socket over a shared volume
+- agent: host-networked with NET_ADMIN, talking to the real host firewall and
+  exposing the typed Unix socket over a shared volume
+
+The server consumes the shared typed Unix socket. Only the agent container has
+the host network namespace and firewall capabilities.
 
     docker compose up -d
 
-### How agents reach the server across the network
+### Remote agents
 
-Agents always dial OUT to the server; managed hosts need no inbound
-ports. Point each agent at the server address:
+Remote agents accept a central URL and keep the local Unix socket private:
 
-    # on each managed host
-    fyrwall agent --server https://fw.example.com
+    FYRWALL_AGENT_ENROLLMENT_TOKEN='<single-use-token>' \
+      fyrwall agent --server https://fw.example.com
 
-Inside Docker networks, agents reach the server by service name
-(server:7443). Across the internet, publish 7443 via your reverse
-proxy with TLS and set server.domain so Host binding is enforced.
+Agents dial out, so managed hosts need no inbound management port. Production
+deployments require TLS. Per-agent credentials, ordered updates, state hashes,
+durable commands, and reconnect reconciliation are built in.
 
 ### Why the agent needs host network + NET_ADMIN
 

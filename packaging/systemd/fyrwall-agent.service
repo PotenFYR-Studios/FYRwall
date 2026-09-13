@@ -2,10 +2,11 @@
 Description=FYRwall local firewall agent
 Documentation=https://github.com/PotenFYR-Studios/FYRwall
 After=network.target
+Before=fyrwall-server.service
 
 [Service]
 Type=simple
-User=fyrwall
+User=root
 Group=fyrwall
 ExecStart=/usr/bin/fyrwall agent --config /etc/fyrwall/config.yaml
 Restart=on-failure
@@ -13,16 +14,17 @@ RestartSec=5
 RuntimeDirectory=fyrwall
 RuntimeDirectoryMode=0750
 
-# The agent is unprivileged; firewall mutation happens through the
-# privileged helper, not this process.
+# Narrow privileged boundary. Agent accepts typed allowlisted operations only;
+# web/API server remains unprivileged and has no command execution path.
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=true
 ProtectKernelTunables=true
 ProtectKernelModules=true
-CapabilityBoundingSet=
-AmbientCapabilities=
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_RAW
+AmbientCapabilities=CAP_NET_ADMIN CAP_NET_RAW
+ReadWritePaths=/run/fyrwall /var/lib/fyrwall /var/log/fyrwall /etc/fyrwall -/etc/ufw -/var/lib/ufw
 
 [Install]
 WantedBy=multi-user.target

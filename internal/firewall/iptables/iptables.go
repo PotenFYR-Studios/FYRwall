@@ -172,6 +172,11 @@ func (b *Backend) ListRules(ctx context.Context) ([]firewall.Rule, error) {
 
 // Validate delegates to the shared engine.
 func (b *Backend) Validate(ctx context.Context, tx firewall.Transaction) firewall.ValidationResult {
+	for _, action := range tx.Actions {
+		if action.Op != "add" && action.Op != "delete" {
+			return firewall.ValidationResult{Valid: false, Errors: []string{"iptables supports add and delete transactions"}}
+		}
+	}
 	rules, err := b.ListRules(ctx)
 	if err != nil {
 		return firewall.ValidationResult{Valid: false, Errors: []string{err.Error()}}
@@ -240,7 +245,7 @@ func ruleToArgs(r *firewall.Rule, op string) ([]string, error) {
 	if chain == "" {
 		return nil, fmt.Errorf("unsupported direction %q", r.Direction)
 	}
-	args := []string{op, chain}
+	args := []string{"-I", chain}
 	switch op {
 	case "add":
 		args = append(args, "1") // insert at top for deterministic ordering
@@ -273,10 +278,10 @@ func ruleToArgs(r *firewall.Rule, op string) ([]string, error) {
 		args = append(args, "-d", r.Destination)
 	}
 	if r.SourcePort != "" {
-		args = append(args, "--sports", normalizePortArg(r.SourcePort))
+		args = appendPortMatch(args, "source", r.SourcePort)
 	}
 	if r.DestinationPort != "" {
-		args = append(args, "--dports", normalizePortArg(r.DestinationPort))
+		args = appendPortMatch(args, "destination", r.DestinationPort)
 	}
 	if r.InterfaceIn != "" {
 		args = append(args, "-i", r.InterfaceIn)
@@ -299,6 +304,19 @@ func ruleToArgs(r *firewall.Rule, op string) ([]string, error) {
 func normalizePortArg(p string) string {
 	// iptables multiport uses comma-separated and colon ranges.
 	return strings.ReplaceAll(p, "-", ":")
+}
+
+func appendPortMatch(args []string, direction, port string) []string {
+	port = normalizePortArg(port)
+	flag := "--dport"
+	multiFlag := "--dports"
+	if direction == "source" {
+		flag, multiFlag = "--sport", "--sports"
+	}
+	if strings.Contains(port, ",") {
+		return append(args, "-m", "multiport", multiFlag, port)
+	}
+	return append(args, flag, port)
 }
 
 // Verify compares fresh save output hash to expectation.
@@ -331,17 +349,7 @@ func restore(ctx context.Context, bin, content string) error {
 	if bin == "" {
 		return fmt.Errorf("%s binary not available", bin)
 	}
-	tmp, err := os.CreateTemp("", "fyrwall-restore-*.rules")
-	if err != nil {
-		return err
-	}
-	defer os.Remove(tmp.Name())
-	if _, err := tmp.WriteString(content); err != nil {
-		tmp.Close()
-		return err
-	}
-	tmp.Close()
-	out, err := exec.Run(ctx, 60*time.Second, bin, tmp.Name())
+	out, err := exec.RunInput(ctx, 60*time.Second, content, bin)
 	if err != nil {
 		return fmt.Errorf("%s: %s", bin, firstLine(out.Stderr))
 	}

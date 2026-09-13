@@ -48,8 +48,8 @@ The installer NEVER touches your firewall rules.
 
 ## First boot
 
-    FYRWALL_ADMIN_PASSWORD='choose-a-long-random-password' sudo -E fyrwall user create-admin
     sudo systemctl enable --now fyrwall-agent fyrwall-server
-    # open http://127.0.0.1:7443 and log in
+    # open http://127.0.0.1:7443: the one-time setup wizard creates the
+    # super admin account and its password right in the browser.
 
 See [Operation](operation.md) for the daily workflow.

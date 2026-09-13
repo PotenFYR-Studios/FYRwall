@@ -1,8 +1,8 @@
 [Unit]
 Description=FYRwall firewall management server
 Documentation=https://github.com/PotenFYR-Studios/FYRwall
-After=network-online.target
-Wants=network-online.target
+After=network-online.target fyrwall-agent.service
+Wants=network-online.target fyrwall-agent.service
 
 [Service]
 Type=simple
@@ -29,7 +29,7 @@ RestrictNamespaces=true
 SystemCallArchitectures=native
 CapabilityBoundingSet=
 AmbientCapabilities=
-ReadWritePaths=/var/lib/fyrwall /var/log/fyrwall /run/fyrwall
+ReadWritePaths=/var/lib/fyrwall /var/log/fyrwall /run/fyrwall /etc/fyrwall
 
 [Install]
 WantedBy=multi-user.target

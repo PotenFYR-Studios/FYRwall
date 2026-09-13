@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/rs/zerolog"
 
@@ -21,6 +22,7 @@ import (
 	"github.com/PotenFYR-Studios/FYRwall/internal/firewall/ufw"
 	"github.com/PotenFYR-Studios/FYRwall/internal/health"
 	"github.com/PotenFYR-Studios/FYRwall/internal/logging"
+	"github.com/PotenFYR-Studios/FYRwall/internal/pki"
 	"github.com/PotenFYR-Studios/FYRwall/internal/system"
 	"github.com/PotenFYR-Studios/FYRwall/internal/ui"
 	"github.com/PotenFYR-Studios/FYRwall/internal/version"
@@ -149,8 +151,8 @@ func RunServer(ctx context.Context, configPath string) error {
 
 	// Binary integrity: server + embedded web GUI tamper check on boot
 	// (spec: protect the whole stack, not just the agent).
-	configDir := filepathDir(configPath)
-	if ierr := selfIntegrityCheck(configDir); ierr != nil {
+	stateDir := filepathJoin(filepathDir(cfg.Database.SQLitePath), "server-integrity")
+	if ierr := selfIntegrityCheck(stateDir); ierr != nil {
 		ht.Set("integrity", health.StateDegraded, ierr.Error())
 		log.Error().Str("event_code", "INTEGRITY_FAILED").Err(ierr).
 			Msg("binary tamper check failed; privileged operations disabled")
@@ -160,12 +162,16 @@ func RunServer(ctx context.Context, configPath string) error {
 		ht.Set("integrity", health.StateHealthy, "binary hash verified")
 	}
 
-	// Firewall backend detection (read-only).
-	backend, ownership, err := detectBackend(ctx, cfg)
+	// The web process never invokes firewall tools. All access crosses the
+	// typed local agent socket, including when server and agent share a host.
+	backend := agent.NewClient(agent.SocketPath)
+	capabilities, err := backend.Capabilities(ctx)
+	ownership := capabilities.Ownership
 	if err != nil {
+		ownership = firewall.OwnershipReport{Owner: firewall.OwnerUnknown, WritesAllowed: false, Reason: "local agent unavailable"}
 		ht.Set("firewall", health.StateBlocked, err.Error())
-		emitStartupIssue(db, "FW_BACKEND_NOT_FOUND", "critical", "firewall",
-			"no usable firewall backend detected", "Install ufw or iptables, or adjust firewall.backend.")
+		emitStartupIssue(db, "AGENT_UNAVAILABLE", "critical", "agent",
+			"local firewall agent is unavailable", "Start fyrwall-agent and verify /run/fyrwall/agent.sock permissions.")
 	} else {
 		if ownership.Owner == firewall.OwnerMultipleConflicting {
 			ht.Set("firewall", health.StateDegraded, ownership.Reason)
@@ -194,9 +200,40 @@ func RunServer(ctx context.Context, configPath string) error {
 			emitStartupIssue(db, ev.Code, ev.Severity, ev.Component, ev.Summary, ev.Remediation)
 		})
 	mgr.SetOwnership(ownership)
+	go func() {
+		ticker := time.NewTicker(10 * time.Second)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				capabilities, capErr := backend.Capabilities(ctx)
+				if capErr != nil {
+					ht.Set("firewall", health.StateBlocked, capErr.Error())
+					continue
+				}
+				mgr.SetOwnership(capabilities.Ownership)
+				if capabilities.Ownership.WritesAllowed {
+					ht.Set("firewall", health.StateHealthy, string(capabilities.Ownership.Owner))
+				} else {
+					ht.Set("firewall", health.StateDegraded, capabilities.Ownership.Reason)
+				}
+			}
+		}
+	}()
 
+	// Agent CA enables mTLS on agent poll/result requests while enrollment
+	// remains available with a short-lived one-time token.
+	agentPKI, err := pki.New(filepathJoin(filepathDir(cfg.Database.SQLitePath), "pki"))
+	if err != nil {
+		return fmt.Errorf("agent pki: %w", err)
+	}
+	if cfg.TLS.Enabled {
+		cfg.TLS.ClientCAFile = agentPKI.CertPath
+	}
 	// HTTP server.
-	srv := api.New(cfg, log, db, mgr, ht, diagnostics.NewRegistry())
+	srv := api.New(cfg, log, db, mgr, ht, diagnostics.NewRegistry(), agentPKI)
 	httpLn, err := bindListener(cfg)
 	if err != nil {
 		ht.Set("web", health.StateBlocked, err.Error())
@@ -236,15 +273,15 @@ func serveRecoveryUI(cfg *config.Config, log zerolog.Logger, ht *health.Tracker,
 	srv.serve()
 }
 
-// RunAgent runs the unprivileged agent with its Unix socket. The agent
-// verifies its own binary hash on boot before touching the firewall.
+// RunAgent runs the narrow privileged agent with its typed Unix socket. The
+// agent verifies its own binary hash on boot before touching the firewall.
 func RunAgent(ctx context.Context, configPath string) error {
-	cfg, err := config.Load(configPath)
+	cfg, err := config.LoadAgent(configPath)
 	if err != nil {
 		return err
 	}
 	log := buildLogger(cfg)
-	if err := selfIntegrityCheck(filepathDir(configPath)); err != nil {
+	if err := selfIntegrityCheck(filepathJoin(filepathDir(cfg.Database.SQLitePath), "agent-integrity")); err != nil {
 		log.Error().Str("event_code", "INTEGRITY_FAILED").Err(err).
 			Msg("agent binary tamper check failed; agent refuses to start")
 		return fmt.Errorf("agent integrity check failed: %w", err)
@@ -261,6 +298,13 @@ func RunAgent(ctx context.Context, configPath string) error {
 		return err
 	}
 	log.Info().Str("event_code", "AGENT_READY").Msg("agent listening")
+	if cfg.Agent.ServerURL != "" {
+		go func() {
+			if err := srv.RunRemoteSync(ctx, cfg, log); err != nil {
+				log.Error().Str("event_code", "AGENT_SYNC_FAILED").Err(err).Msg("remote agent synchronization stopped")
+			}
+		}()
+	}
 	return srv.Serve(ctx)
 }
 
@@ -357,21 +401,6 @@ func RunMigrations(configPath string) error {
 	defer db.Close()
 	fmt.Println("migrations applied")
 	return nil
-}
-
-// CreateAdmin bootstraps the first admin from an env-var password
-// (spec section 29: password never on argv).
-func CreateAdmin(configPath string) error {
-	cfg, err := config.Load(configPath)
-	if err != nil {
-		return err
-	}
-	db, err := openDB(cfg)
-	if err != nil {
-		return err
-	}
-	defer db.Close()
-	return createAdminIn(db)
 }
 
 // RestoreList prints restore points.

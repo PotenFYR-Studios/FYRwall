@@ -18,7 +18,7 @@ func main() {
 	}
 	root.AddCommand(serverCmd(), agentCmd(), statusCmd(), doctorCmd(),
 		preflightCmd(), versionCmd(), configValidateCmd(), migrateCmd(),
-		userCreateAdminCmd(), restoreCmd(), serviceCmd(),
+		restoreCmd(), serviceCmd(),
 		setupCmd(), extensionCmd(), updateCmd(), uninstallSelfCmd(), trayCmd())
 
 	if err := root.Execute(); err != nil {
@@ -47,15 +47,22 @@ func serverCmd() *cobra.Command {
 }
 
 func agentCmd() *cobra.Command {
+	var serverURL string
 	c := &cobra.Command{
 		Use:   "agent",
 		Short: "Run the local firewall agent (Unix socket, unprivileged)",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if serverURL != "" {
+				if err := os.Setenv("FYRWALL_AGENT_SERVER_URL", serverURL); err != nil {
+					return err
+				}
+			}
 			return app.RunAgent(cmd.Context(), flagConfig)
 		},
 	}
 	addConfigFlag(c)
+	c.Flags().StringVar(&serverURL, "server", "", "central server URL for outbound fleet synchronization")
 	return c
 }
 
@@ -131,21 +138,6 @@ func migrateCmd() *cobra.Command {
 		},
 	}
 	addConfigFlag(c)
-	return c
-}
-
-func userCreateAdminCmd() *cobra.Command {
-	c := &cobra.Command{
-		Use:   "user create-admin",
-		Short: "Bootstrap the first administrator",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return app.CreateAdmin(flagConfig)
-		},
-	}
-	addConfigFlag(c)
-	c.Flags().String("username", "", "administrator username")
-	c.Flags().String("password-env", "FYRWALL_ADMIN_PASSWORD",
-		"environment variable holding the password (never a CLI flag)")
 	return c
 }
 

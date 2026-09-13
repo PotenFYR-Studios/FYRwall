@@ -41,3 +41,13 @@ restore_points:
 security:
   session_idle_timeout_minutes: 30
   login_rate_limit_per_minute: 5
+
+agent:
+  server_url: ""          # set on remote targets, e.g. https://fw.example.com
+  enrollment_token: ""    # prefer FYRWALL_AGENT_ENROLLMENT_TOKEN for first boot
+  credential_file: "/var/lib/fyrwall/agent-credential.json"
+  id_file: "/var/lib/fyrwall/agent-id"
+  display_name: ""
+  labels: []
+  groups: []
+  site: ""

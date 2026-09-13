@@ -1,15 +1,27 @@
 # Architecture
 
+This is the implemented control-plane architecture.
+
     Browser (React, embedded)
         |
         v
-    fyrwall-server (unprivileged)
-        |  Unix socket /run/fyrwall/agent.sock (0660)
-        v
-    fyrwall-agent (unprivileged) --> privileged helper (root, typed ops)
+    fyrwall-server (unprivileged control plane)
         |
-        v
-    UFW / iptables / nftables
+        +-- local Unix socket --> co-located agent (optional)
+        |
+        +-- outbound authenticated sessions from remote agents
+                                  |
+                                  v
+                         UFW / iptables / nftables
+
+The agent belongs on every machine whose firewall FYRwall manages. An agent
+may be explicitly installed beside the server so the central host becomes
+another managed target. The server uses the local typed socket; remote agents
+use single-use enrollment tokens and authenticated restart-safe long polling.
+
+Fleet sync uses ordered revisions, state hashes, durable command delivery, and
+reconciliation after reconnects. This supports safe offline operation, central
+audit history, mixed-backend inventory, and verified rollback per target.
 
 ## Backend abstraction
 

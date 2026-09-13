@@ -1,14 +1,10 @@
-# FYRwall compose deployment: central server + host agent bridged over a
-# shared Unix socket volume so the containerized server can reach the
-# host's firewall through the host-installed agent.
+# FYRwall compose deployment: central server + host agent sharing a typed
+# Unix socket. Only the agent receives host firewall capabilities.
 #
 #   docker compose up -d          # start server
 #   Web UI: http://127.0.0.1:7443
 #
-# Agent connectivity from OTHER hosts: each managed host installs the
-# agent natively (install.sh) or as a container with host network + caps
-# (see docs/content/docker.md). Agents always dial OUT to the server on
-# port 7443/agent - no inbound ports on managed hosts.
+# Remote agents connect outbound using the configured central server URL.
 services:
   server:
     build: .
@@ -41,10 +37,11 @@ services:
     command: ["agent", "--config", "/etc/fyrwall/config.yaml"]
     volumes:
       - fyrwall-run:/run/fyrwall
-      - fyrwall-data:/var/lib/fyrwall
+      - fyrwall-agent-data:/var/lib/fyrwall
       - /etc/fyrwall:/etc/fyrwall:ro
 
 volumes:
   fyrwall-data:
   fyrwall-logs:
   fyrwall-run:
+  fyrwall-agent-data:

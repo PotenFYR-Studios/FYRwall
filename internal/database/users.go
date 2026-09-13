@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"database/sql"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"time"
 
@@ -97,6 +98,36 @@ func (r *UserRepo) SetPassword(id, hash string, mustChange bool) error {
 	_, err := r.db.SQL().Exec(`UPDATE users SET password_hash = ?, must_change_password = ?,
 		updated_at = ? WHERE id = ?`, hash, boolInt(mustChange), time.Now().UTC().Format(time.RFC3339), id)
 	return err
+}
+
+// ErrSuperAdminExists is returned when the super admin is already set up.
+var ErrSuperAdminExists = errors.New("super admin already set up")
+
+// SetupSuperAdmin creates the one-time super admin account with a locked
+// (empty) hash; the password is chosen at first login via the web setup
+// wizard. Refuses when an enabled super_admin already exists.
+func (r *UserRepo) SetupSuperAdmin(username string) (*User, error) {
+	n, err := r.CountAdmins()
+	if err != nil {
+		return nil, err
+	}
+	if n > 0 {
+		return nil, ErrSuperAdminExists
+	}
+	if len(username) < 3 {
+		return nil, fmt.Errorf("username min 3 chars")
+	}
+	now := time.Now().UTC()
+	id := uuid.NewString()
+	_, err = r.db.SQL().Exec(`INSERT INTO users
+		(id, username, password_hash, role, enabled, must_change_password, created_at, updated_at)
+		VALUES (?,?,?,?,1,1,?,?)`,
+		id, username, "", string(auth.RoleSuperAdmin), boolInt(true),
+		now.Format(time.RFC3339), now.Format(time.RFC3339))
+	if err != nil {
+		return nil, err
+	}
+	return r.Get(username)
 }
 
 // SetEnabled toggles a user.

@@ -1,5 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
+import { Activity, ShieldAlert, ShieldCheck, Waypoints } from "lucide-react";
+
 import { fetchJSON } from "../components/HealthBadge";
+import { BorderBeam, NumberTicker } from "../components/magicui";
 
 type FirewallStatus = {
   status: {
@@ -13,11 +16,33 @@ type FirewallStatus = {
   ownership: { owner: string; writes_allowed: boolean; reason?: string };
 };
 
-function Card({ title, value, warn }: { title: string; value: string; warn?: boolean }) {
+function Card({
+  title,
+  value,
+  warn,
+  ticker,
+  icon: Icon,
+}: {
+  title: string;
+  value: string | number;
+  warn?: boolean;
+  ticker?: boolean;
+  icon?: React.ComponentType<{ className?: string }>;
+}) {
   return (
-    <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
-      <div className="text-xs text-zinc-500 uppercase tracking-wide">{title}</div>
-      <div className={`mt-1 text-xl font-semibold ${warn ? "text-yellow-400" : "text-zinc-100"}`}>{value}</div>
+    <div className="relative overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900 p-4 transition hover:border-zinc-700">
+      {ticker && <BorderBeam size={40} duration={9} />}
+      <div className="flex items-center justify-between">
+        <div className="text-xs uppercase tracking-wide text-zinc-500">{title}</div>
+        {Icon && <Icon className="h-4 w-4 text-zinc-600" />}
+      </div>
+      <div className={`mt-1 text-xl font-semibold ${warn ? "text-yellow-400" : "text-zinc-100"}`}>
+        {ticker && typeof value === "number" ? (
+          <NumberTicker value={value} />
+        ) : (
+          value
+        )}
+      </div>
     </div>
   );
 }
@@ -42,15 +67,18 @@ export default function Dashboard() {
   return (
     <div className="space-y-4">
       {own.owner === "MULTIPLE_CONFLICTING" && (
-        <div className="rounded-lg border border-red-900 bg-red-950/40 p-4" data-testid="conflict-banner">
-          <p className="font-semibold text-red-300">Multiple firewall managers detected</p>
-          <p className="text-sm text-red-400 mt-1">{own.reason}</p>
+        <div className="flex items-start gap-2 rounded-lg border border-red-900 bg-red-950/40 p-4" data-testid="conflict-banner">
+          <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-red-400" />
+          <div>
+            <p className="font-semibold text-red-300">Multiple firewall managers detected</p>
+            <p className="mt-1 text-sm text-red-400">{own.reason}</p>
+          </div>
         </div>
       )}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card title="Backend" value={s.backend} />
-        <Card title="Enabled" value={s.enabled ? "Yes" : "No"} warn={!s.enabled} />
-        <Card title="Active rules" value={String(s.rule_count)} />
+        <Card title="Backend" value={s.backend} icon={Waypoints} />
+        <Card title="Enabled" value={s.enabled ? "Yes" : "No"} warn={!s.enabled} icon={ShieldCheck} />
+        <Card title="Active rules" value={s.rule_count} ticker icon={Activity} />
         <Card title="Policy owner" value={own.owner} warn={!own.writes_allowed} />
         <Card title="Inbound default" value={s.default_policies.find((p) => p.direction === "in")?.action ?? "unknown"} />
         <Card title="Outbound default" value={s.default_policies.find((p) => p.direction === "out")?.action ?? "unknown"} />

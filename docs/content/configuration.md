@@ -53,6 +53,24 @@ supported default.
   change rolls back automatically.
 - `allow_write_on_manager_conflict`: explicit acknowledgment only.
 
+## Agent and fleet
+
+    agent:
+      server_url: ""
+      enrollment_token: ""
+      credential_file: "/var/lib/fyrwall/agent-credential.json"
+      id_file: "/var/lib/fyrwall/agent-id"
+      display_name: ""
+      labels: []
+      groups: []
+      site: ""
+
+- `server_url`: central HTTPS URL for outbound fleet synchronization.
+- `enrollment_token`: single-use first-boot token. Prefer the
+  `FYRWALL_AGENT_ENROLLMENT_TOKEN` environment variable so it is not stored.
+- `credential_file` and `id_file`: root-owned 0600 agent identity state.
+- `labels`, `groups`, and `site`: fleet targeting and inventory metadata.
+
 ## Service
 
     service:
@@ -101,10 +119,12 @@ RBAC are always on; these keys tune the session and login throttle.
     FYRWALL_TLS_KEY=/path/to/key.pem
     FYRWALL_SAFE_APPLY_TIMEOUT=60
     FYRWALL_ALLOW_INSECURE_BIND=false
-    FYRWALL_ADMIN_PASSWORD=...
+    FYRWALL_AGENT_SERVER_URL=https://fw.example.com
+    FYRWALL_AGENT_ENROLLMENT_TOKEN=<single-use-token>
 
 Passwords and tokens arrive via the environment or secret-file references,
-never via command-line arguments.
+never via command-line arguments. The initial super admin password is
+chosen in the web setup wizard on first boot, not provisioned via env.
 
 ## Encrypted config at rest
 

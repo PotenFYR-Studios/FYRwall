@@ -15,8 +15,22 @@ Yes. Set trusted_proxies and your domain. The GUI enforces the configured
 Host when domain binding is on.
 
 **Can it manage many servers?**
-Yes: agents on other hosts dial out to the central server over mTLS-style
-enrollment; discovery is opt-in and scope-limited.
+Yes. Remote agents dial out to the central server, enroll with single-use
+tokens and per-agent credentials, and synchronize rules, health, ownership,
+drift hashes, inventory, policy revisions, and command results.
+
+**Can the central FYRwall server manage its own firewall too?**
+Yes. Install an agent on the same host as the server, then treat that machine
+as another target. Keep the web/API process
+unprivileged; only the narrow agent boundary may perform firewall
+operations. FYRwall should never silently inject an agent.
+
+**Is fleet synchronization realtime?**
+Yes, using authenticated outbound long polling. Agents report ordered state
+revisions and hashes; commands usually arrive within one polling round trip.
+Pending results survive agent restarts, while stale deliveries are reconciled.
+mTLS client certificates rotate automatically before expiry and can be revoked
+per agent from the Fleet page.
 
 **What if the agent dies?**
 The web server stays up, shows the agent offline, disables writes and gives

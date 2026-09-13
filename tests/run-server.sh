@@ -13,9 +13,6 @@
 #
 # Env:
 #   PORT                     default port (7443); --port wins
-#   FYRWALL_ADMIN_PASSWORD   bootstrap admin password (policy: 14+ chars,
-#                            upper/lower/digit/special); a random one is
-#                            generated and printed when unset
 #
 # Ctrl-C stops the server. State (db, logs, integrity record) lives in
 # tests/.tmp/ and is gitignored; delete that dir for a factory reset.
@@ -23,14 +20,12 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 PORT="${PORT:-7443}"
-ADMIN_USER="admin"
 BUILD_FRONTEND="auto" # auto | yes | no
 NO_BUILD=0
 
 while [ $# -gt 0 ]; do
   case "$1" in
     --port) PORT="$2"; shift 2 ;;
-    --admin-user) ADMIN_USER="$2"; shift 2 ;;
     --no-build) NO_BUILD=1; BUILD_FRONTEND=no; shift ;;
     --rebuild-frontend) BUILD_FRONTEND=yes; shift ;;
     -h|--help) sed -n '2,22p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
@@ -109,34 +104,13 @@ if command -v ss >/dev/null 2>&1; then
   fi
 fi
 
-# ---- [4/4] Bootstrap admin + serve ----
+# ---- [4/4] Serve (super admin is set up through the web GUI on first run) ----
 echo "[3/4] Config: $CFG"
-if [ -n "${FYRWALL_ADMIN_PASSWORD:-}" ]; then
-  ADMIN_PW="$FYRWALL_ADMIN_PASSWORD"
-else
-  # Random local-dev password that passes the 14+ char mixed-class policy
-  # (suffix guarantees upper/lower/digit/special; no SIGPIPE under pipefail).
-  while :; do
-    ADMIN_PW="$(head -c 256 /dev/urandom | LC_ALL=C tr -dc 'A-HJ-NP-Za-km-z2-9' | head -c 16)xA9!"
-    printf '%s' "$ADMIN_PW" | grep -qE '(.)\1\1' || break
-  done
-fi
-
-echo "[4/4] Bootstrapping admin '$ADMIN_USER' (skipped if one already exists)"
-ADMIN_OK=1
-ADMIN_OUT="$(FYRWALL_ADMIN_USERNAME="$ADMIN_USER" FYRWALL_ADMIN_PASSWORD="$ADMIN_PW" \
-  "$BIN" user create-admin --config "$CFG" 2>&1)" || ADMIN_OK=0
-if [ "$ADMIN_OK" = 1 ]; then
-  LOGIN_NOTE="  Login:   ${ADMIN_USER} / ${ADMIN_PW}   (local dev only)"
-elif printf '%s' "$ADMIN_OUT" | grep -q "already exists"; then
-  LOGIN_NOTE="  Login:   existing '$ADMIN_USER' admin; use your saved password"
-else
-  LOGIN_NOTE="  Login:   none bootstrapped ($ADMIN_OUT)"
-fi
 
 echo
 echo "  Web UI:  http://127.0.0.1:${PORT}"
-echo "$LOGIN_NOTE"
+echo "  First run: the GUI opens the one-time super admin setup wizard;"
+echo "           choose the admin username and password there."
 echo
 
 echo "Serving on http://127.0.0.1:${PORT}  (logs: $WORKDIR/logs/fyrwall.log; Ctrl-C to stop)"
