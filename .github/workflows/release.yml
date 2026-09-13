@@ -149,7 +149,15 @@ jobs:
             echo "Version bumps publish by pushing the vX.Y.Z tag."
             exit 0
           fi
-          # Replace the builds (same asset names, clobbered in place)...
+          # Replace the builds (same asset names, clobbered in place),
+          # pruning assets the current build no longer produces (e.g.
+          # old naming schemes left by earlier workflows).
+          gh release view "$TAG" --json assets --jq '.assets[].name' | while read -r name; do
+            if [ ! -f "dist/$name" ]; then
+              gh release delete-asset "$TAG" "$name" --yes
+              echo "pruned stale asset: $name"
+            fi
+          done
           gh release upload "$TAG" dist/* --clobber
           # ...and the changelog: freshly generated notes plus the latest
           # build line, so repeated refreshes never accumulate entries.
