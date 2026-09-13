@@ -2,10 +2,11 @@ name: Docker
 
 # Container publishing with two modes:
 #  1. Same version, new commits (push to master): rebuilds the image and
-#     refreshes the existing vX.Y.Z + rolling tags and appends a commit
-#     line to the release changelog. No new release.
-#  2. Version bump (v* tag): full release - new GitHub Release with
-#     changelog, tarballs, and :vX.Y.Z image tag on top of rolling tags.
+#     refreshes the existing vX.Y.Z + rolling tags. No new release; the
+#     release build line is handled by release.yml.
+#  2. Version bump (v* tag): full release - builds and pushes the :vX.Y.Z
+#     image tag on top of rolling tags. The GitHub Release itself (changelog,
+#     tarballs, installers) is owned by release.yml.
 on:
   push:
     branches: [master]
@@ -23,7 +24,6 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
       packages: write
     steps:
       - uses: actions/checkout@v7
@@ -47,7 +47,8 @@ jobs:
           VERSION=$(cat VERSION 2>/dev/null || echo 0.1.0)
           if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
             echo "mode=release" >> "$GITHUB_OUTPUT"
-            VERSION="${GITHUB_REF#v}"
+            # GITHUB_REF is refs/tags/vX.Y.Z, so strip the full prefix.
+            VERSION="${GITHUB_REF_NAME#v}"
             echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           else
             echo "mode=same-version" >> "$GITHUB_OUTPUT"
@@ -81,31 +82,3 @@ jobs:
           build-args: |
             VERSION=${{ steps.ver.outputs.version }}
             COMMIT=${{ steps.ver.outputs.sha }}
-
-      - name: Update release assets (same-version refresh)
-        if: steps.ver.outputs.mode == 'same-version'
-        run: |
-          # Same version: no new release. Append a build line to the changelog
-          # file so the release notes stay current; existing release untouched.
-          {
-            echo ""
-            echo "### Container build \`${{ steps.ver.outputs.sha }}\` ($(date -u +%Y-%m-%dT%H:%M:%SZ))"
-            echo "Image: \`${{ env.IMAGE }}:${{ steps.ver.outputs.version }}\`"
-          } >> CHANGELOG.md
-          echo "container build refreshed for existing version ${{ steps.ver.outputs.version }}"
-
-      - name: Attach images to release (version bump)
-        if: steps.ver.outputs.mode == 'release'
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ github.ref_name }}
-          generate_release_notes: true
-          body: |
-            ## Container images
-
-            ```
-            docker pull ${{ env.IMAGE }}:${{ steps.ver.outputs.version }}
-            docker pull ${{ env.IMAGE }}:latest
-            ```
-
-            Multi-arch: linux/amd64, linux/arm64

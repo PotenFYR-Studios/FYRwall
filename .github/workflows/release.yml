@@ -1,17 +1,35 @@
 name: Release
 
-# Auto build on version tag: builds all architectures, generates
-# checksums + changelog, and publishes a GitHub Release.
+# Idempotent release pipeline. This workflow owns the GitHub Release
+# (docker.yml only pushes container images and never edits the release).
+#
+#  1. Version tag (vX.Y.Z): full release. An existing release for the same
+#     tag is deleted first (assets included, the git tag is kept), so
+#     re-pushing a tag replaces the builds and the changelog.
+#  2. Push to master / manual dispatch (same-version refresh): rebuilds all
+#     artifacts, replaces the current version's release assets in place
+#     (--clobber) and regenerates the notes with a single build line. No
+#     release is created when none exists for the VERSION file yet.
+#
+# Assets: 7-architecture tarballs, install.sh, uninstall.sh, SHA256SUMS.
 on:
   push:
+    branches: [master]
     tags: ["v*"]
+  workflow_dispatch:
 
 permissions:
   contents: write
 
+concurrency:
+  group: release
+  cancel-in-progress: false
+
 jobs:
   release:
     runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -23,6 +41,21 @@ jobs:
 
       - uses: oven-sh/setup-bun@v2
 
+      - name: Determine version and mode
+        id: ver
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            echo "mode=release" >> "$GITHUB_OUTPUT"
+            # GITHUB_REF is refs/tags/vX.Y.Z, so strip the full prefix.
+            VERSION="${GITHUB_REF_NAME#v}"
+          else
+            echo "mode=refresh" >> "$GITHUB_OUTPUT"
+            VERSION="$(cat VERSION 2>/dev/null || echo 0.1.0)"
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+          echo "sha=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+
       - name: Build frontend
         run: |
           cd web && bun install --frozen-lockfile && bun run build
@@ -32,36 +65,99 @@ jobs:
           rm -rf webembed/dist && mkdir -p webembed/dist
           cp -r web/dist/* webembed/dist/
 
-      - name: Build release artifacts (all architectures)
+      - name: Build release artifacts (all architectures + installers)
         env:
-          VERSION: ${{ github.ref_name }}
-        run: ./scripts/cross-build.sh
-
-      - name: Generate changelog for this tag
-        id: changelog
+          VERSION: ${{ steps.ver.outputs.version }}
         run: |
-          TAG="${GITHUB_REF_NAME#v}"
-          # Prefer the CHANGELOG.md section; fall back to commit log.
-          awk "/^## \\[$TAG\\]/{flag=1;next}/^## \\[/{flag=0}flag" CHANGELOG.md > /tmp/notes.md || true
-          if [ ! -s /tmp/notes.md ]; then
+          rm -rf dist && mkdir -p dist
+          ./scripts/cross-build.sh
+          # Ship the installer itself as a release asset so it can be run
+          # straight from GitHub:
+          #   curl -fsSL https://github.com/<owner>/<repo>/releases/latest/download/install.sh | sudo sh
+          cp packaging/install.sh dist/install.sh
+          cp packaging/uninstall.sh dist/uninstall.sh
+          # One checksum manifest covering every shipped asset.
+          ( cd dist && sha256sum -- *.tar.gz install.sh uninstall.sh > SHA256SUMS )
+
+      - name: Generate release notes
+        env:
+          VERSION: ${{ steps.ver.outputs.version }}
+          TAG: ${{ steps.ver.outputs.tag }}
+        run: |
+          # Prefer the CHANGELOG.md section; fall back to the commit log.
+          awk "/^## \\[$VERSION\\]/{flag=1;next}/^## \\[/{flag=0}flag" CHANGELOG.md > notes.md || true
+          if [ ! -s notes.md ]; then
             PREV=$(git describe --tags --abbrev=0 "${GITHUB_REF}^" 2>/dev/null || echo "")
-            git log --no-merges --pretty="- %s (%h)" ${PREV:+$PREV..}$GITHUB_REF > /tmp/notes.md
+            git log --no-merges --pretty="- %s (%h)" ${PREV:+$PREV..}$GITHUB_REF > notes.md
           fi
+          IMAGE="ghcr.io/${GITHUB_REPOSITORY,,}"
           {
-            echo "## FYRwall $GITHUB_REF_NAME"
+            echo "## FYRwall $TAG"
             echo
-            cat /tmp/notes.md
+            cat notes.md
+            echo
+            echo "## Install"
+            echo
+            echo '```bash'
+            echo "curl -fsSL https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/install.sh | sudo sh"
+            echo '```'
+            echo
+            echo "Review-first: download install.sh from the assets below, read it, then run it."
+            echo
+            echo "### Downloads"
+            echo
+            for f in dist/*.tar.gz; do
+              b="$(basename "$f")"
+              echo "- [$b](https://github.com/${GITHUB_REPOSITORY}/releases/download/$TAG/$b)"
+            done
             echo
             echo "### Checksums"
             echo '```'
             cat dist/SHA256SUMS
             echo '```'
+            echo
+            echo "### Container images"
+            echo '```bash'
+            echo "docker pull $IMAGE:$VERSION"
+            echo "docker pull $IMAGE:latest"
+            echo '```'
+            echo
+            echo "Multi-arch: linux/amd64, linux/arm64"
           } > release-notes.md
 
-      - name: Publish GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          body_path: release-notes.md
-          files: |
-            dist/*.tar.gz
-            dist/SHA256SUMS
+      - name: Publish release (version tag)
+        if: steps.ver.outputs.mode == 'release'
+        env:
+          TAG: ${{ steps.ver.outputs.tag }}
+        run: |
+          # Replace semantics for a re-pushed tag: drop the old release and
+          # its assets, keep the git tag itself.
+          gh release delete "$TAG" --yes || true
+          gh release create "$TAG" dist/* \
+            --title "FYRwall $TAG" \
+            --notes-file release-notes.md
+
+      - name: Refresh existing release (same version, new commits)
+        if: steps.ver.outputs.mode == 'refresh'
+        env:
+          TAG: ${{ steps.ver.outputs.tag }}
+          VERSION: ${{ steps.ver.outputs.version }}
+          SHA: ${{ steps.ver.outputs.sha }}
+        run: |
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            echo "No existing release for $TAG; nothing refreshed."
+            echo "Version bumps publish by pushing the vX.Y.Z tag."
+            exit 0
+          fi
+          # Replace the builds (same asset names, clobbered in place)...
+          gh release upload "$TAG" dist/* --clobber
+          # ...and the changelog: freshly generated notes plus the latest
+          # build line, so repeated refreshes never accumulate entries.
+          IMAGE="ghcr.io/${GITHUB_REPOSITORY,,}"
+          {
+            cat release-notes.md
+            echo
+            echo "### Build \`$SHA\` ($(date -u +%Y-%m-%dT%H:%M:%SZ))"
+            echo "Rebuilt binaries, installers and checksums for this version; refreshed \`$IMAGE:$VERSION\` and the rolling image tags."
+          } > refresh-notes.md
+          gh release edit "$TAG" --notes-file refresh-notes.md

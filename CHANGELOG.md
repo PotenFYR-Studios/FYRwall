@@ -3,6 +3,21 @@
 All notable changes to FYRwall are documented here. Format follows
 Keep a Changelog; versions follow Semantic Versioning.
 
+## [Unreleased]
+
+### Added
+- GitHub Releases now ship `install.sh` and `uninstall.sh` as assets
+  alongside the 7-architecture tarballs, with a `SHA256SUMS` manifest
+  covering every asset; install straight from a release:
+  `curl -fsSL https://github.com/PotenFYR-Studios/FYRwall/releases/latest/download/install.sh | sudo sh`
+
+### Changed
+- Release workflow is idempotent: re-pushing a version tag replaces the
+  release (builds + changelog); pushes to `master` rebuild the current
+  version's release assets in place and regenerate the notes with a single
+  build line. Docker workflow no longer edits the release; release.yml is
+  its sole owner.
+
 ## [0.1.0] - 2026-09-11
 
 ### Added
