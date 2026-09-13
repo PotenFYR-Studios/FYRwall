@@ -2,9 +2,11 @@
 # FYRwall installer.
 #
 # Review-first installation is recommended:
-#   curl -fsSLo install-fyrwall.sh https://fyrwall.docs.potenfyr.in/install.sh
+#   curl -fLo install-fyrwall.sh https://github.com/PotenFYR-Studios/FYRwall/releases/latest/download/install.sh
 #   less install-fyrwall.sh
 #   sudo sh install-fyrwall.sh
+# (https://fyrwall.docs.potenfyr.in/install.sh serves the identical file;
+# install.sh is also shipped as an asset of every GitHub Release.)
 #
 # The installer never modifies firewall rules. It creates the service
 # account and directories, installs binaries and units, and runs
@@ -110,6 +112,7 @@ if [ -z "$BIN" ]; then
     exit 1
   fi
   if fetch "$BASE/SHA256SUMS" "$TMP/SHA256SUMS" && command -v sha256sum >/dev/null 2>&1; then
+    # .tar.gz suffix keeps the arm64 line from matching a GOARCH=arm grep.
     grep "linux_${GOARCH}.tar.gz" "$TMP/SHA256SUMS" | (cd "$TMP" && sha256sum -c -) || {
       echo "error: checksum verification failed for $TARBALL" >&2
       rm -rf "$TMP"
