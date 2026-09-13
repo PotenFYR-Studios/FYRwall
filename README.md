@@ -296,7 +296,7 @@ Validate with `./fyrwall config validate --config your.yaml`.
 
 ## Building
 
-Requirements: Go 1.24+, bun (or Node 20+) for the frontend, GNU make or plain shell.
+Requirements: Go 1.26+, bun (or Node 20+) for the frontend, GNU make or plain shell.
 
 ### 1. Frontend
 
@@ -352,7 +352,7 @@ All Go tests run inside Docker, never on the host:
 ./scripts/docker-test.sh ./internal/firewall/... # targeted packages
 ```
 
-The runner builds `Dockerfile.test` (golang:1.24-bookworm + iptables), then executes with `--network=none --read-only --cap-drop=ALL` and offline module resolution. Current status: 46 tests passing across 6 packages.
+The runner builds `Dockerfile.test` (golang:1.26-bookworm + iptables), then executes with `--network=none --read-only --cap-drop=ALL` and offline module resolution. Current status: 46 tests passing across 6 packages.
 
 Frontend:
 
@@ -533,12 +533,12 @@ Full documentation lives at [fyrwall.docs.potenfyr.in](https://fyrwall.docs.pote
 ## ⭐ Star History
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=potenfyr-studios/authcore,potenfyr-studios/statfyr,potenfyr-studios/discord-botlists,potenfyr-studios/shell-eggs,potenfyr-studios/prog-language-eggs,potenfyr-studios/minecraft-eggs,potenfyr-studios/database-eggs,potenfyr-studios/apicordon,potenfyr-studios/ojaj,potenfyr-studios/fyrwall,potenfyr-studios/echoingdeaths&type=Date&theme=dark" />
-  <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=potenfyr-studios/authcore,potenfyr-studios/statfyr,potenfyr-studios/discord-botlists,potenfyr-studios/shell-eggs,potenfyr-studios/prog-language-eggs,potenfyr-studios/minecraft-eggs,potenfyr-studios/database-eggs,potenfyr-studios/apicordon,potenfyr-studios/ojaj,potenfyr-studios/fyrwall,potenfyr-studios/echoingdeaths&type=Date" />
-  <img alt="Star history chart for all PotenFYR Studios public repositories" src="https://api.star-history.com/svg?repos=potenfyr-studios/authcore,potenfyr-studios/statfyr,potenfyr-studios/discord-botlists,potenfyr-studios/shell-eggs,potenfyr-studios/prog-language-eggs,potenfyr-studios/minecraft-eggs,potenfyr-studios/database-eggs,potenfyr-studios/apicordon,potenfyr-studios/ojaj,potenfyr-studios/fyrwall,potenfyr-studios/echoingdeaths&type=Date" width="80%" />
+  <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=potenfyr-studios/fyrwall&type=Date&theme=dark" />
+  <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=potenfyr-studios/fyrwall&type=Date" />
+  <img alt="Star history chart for FYRwall" src="https://api.star-history.com/svg?repos=potenfyr-studios/fyrwall&type=Date" width="80%" />
 </picture>
 
-Every public PotenFYR Studios repository on one live chart, served by [star-history.com](https://star-history.com).
+Live FYRwall star chart, served by [star-history.com](https://star-history.com).
 
 ---
 
@@ -566,7 +566,7 @@ Contributions make the open-source community such an amazing place to learn, ins
 
 ## Platform Support
 
-Capability-based detection rather than distro assumptions. Works wherever Go 1.24 runs and either UFW or iptables exists: Debian/Ubuntu, RHEL/Fedora/Rocky/Alma, SUSE, Arch, Alpine, Void, Gentoo. Init systems: systemd, OpenRC, runit, s6, SysV fallback. Release targets: amd64, arm64, arm, 386, ppc64le, s390x, riscv64.
+Capability-based detection rather than distro assumptions. Works wherever Go 1.26 runs and either UFW or iptables exists: Debian/Ubuntu, RHEL/Fedora/Rocky/Alma, SUSE, Arch, Alpine, Void, Gentoo. Init systems: systemd, OpenRC, runit, s6, SysV fallback. Release targets: amd64, arm64, arm, 386, ppc64le, s390x, riscv64.
 
 FYRwall is fully offline-capable: no CDN assets, no telemetry, no external calls at runtime.
 

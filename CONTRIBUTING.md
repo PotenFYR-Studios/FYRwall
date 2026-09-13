@@ -5,7 +5,7 @@ extra careful with changes, so please read this guide.
 
 ## Development setup
 
-- Go 1.24+, bun (frontend), Docker (all tests run in containers)
+- Go 1.26+, bun (frontend), Docker (all tests run in containers)
 - `git clone` + `cd web && bun install`
 - Build: `./scripts/build.sh`
 - Test: `./scripts/docker-test.sh` (never run tests on the host)
