@@ -102,3 +102,6 @@ CLAUDE.md
 
 # Local server harness state (tests/run-server.sh)
 tests/.tmp/
+
+# Serena MCP local state
+.serena/
