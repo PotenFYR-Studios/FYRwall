@@ -7,6 +7,7 @@ import { renderToString } from "react-dom/server";
 import { readFile, writeFile } from "node:fs/promises";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
+import { fileURLToPath } from "node:url";
 
 const vite = await createServer({
   server: { middlewareMode: true },
@@ -34,7 +35,7 @@ try {
   await vite.close();
 
   // import.meta.url is percent-encoded; decode it (path contains a space).
-const distDir = decodeURIComponent(new URL("../", import.meta.url).pathname);
+const distDir = fileURLToPath(new URL("../", import.meta.url));
 const dist = `${distDir}${process.env.VITE_OUT_DIR ?? "dist"}/index.html`;
   const file = await readFile(dist, "utf8");
   if (!file.includes('<div id="root"></div>')) {
