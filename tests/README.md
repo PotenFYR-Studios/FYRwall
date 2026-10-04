@@ -1,6 +1,6 @@
 # Local test harness
 
-## run-server.sh — host the FYRwall server from this checkout
+## run-server.sh, host the FYRwall server from this checkout
 
 Builds the web GUI, syncs it into `webembed/dist`, builds the Go binary,
 and serves everything on `http://127.0.0.1:7443` with an isolated config
@@ -24,7 +24,7 @@ factory reset.
 > sync this script performs) ships a blank GUI. The release pipeline and
 > the Dockerfile both build the frontend for this reason.
 
-## Dockerfile.test — unit and integration tests
+## Dockerfile.test, unit and integration tests
 
 ```sh
 docker build -f Dockerfile.test -t fyrwall-test:latest .

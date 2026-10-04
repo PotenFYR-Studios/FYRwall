@@ -14,7 +14,7 @@ rules.
 - Optional: systemd for the hardened units, a desktop environment for the
   tray/app-menu entry
 
-## Method 1 — installer script (recommended)
+## Method 1, installer script (recommended)
 
 ### One-liner
 
@@ -78,7 +78,7 @@ directory next to the script. `sudo -E` is required so the variables
 survive sudo's env_reset; pin `FYRWALL_VERSION` because an offline
 directory has no VERSION file to read.
 
-## Method 2 — manual tarball from GitHub Releases
+## Method 2, manual tarball from GitHub Releases
 
 Grab assets from the
 [latest release](https://github.com/PotenFYR-Studios/FYRwall/releases/latest):
@@ -94,10 +94,10 @@ Grab assets from the
     sudo install -m 0644 fyrwall_0.1.0_linux_amd64/packaging/systemd/*.service /etc/systemd/system/
     sudo systemctl daemon-reload
 
-(Adjust the version/arch in the filenames; `uname -m` tells you yours —
+(Adjust the version/arch in the filenames; `uname -m` tells you yours,
 x86_64 → amd64, aarch64 → arm64.)
 
-## Method 3 — Docker
+## Method 3. Docker
 
     docker run -d --name fyrwall \
       -p 127.0.0.1:7443:7443 \

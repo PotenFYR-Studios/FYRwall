@@ -147,11 +147,11 @@ rules. Full details: [docs/content/installation.md](docs/content/installation.md
 
 | Method | Best for |
 |---|---|
-| 1. Installer script (curl) | most hosts — fastest, checksum-verified |
+| 1. Installer script (curl) | most hosts, fastest, checksum-verified |
 | 2. Release tarball (manual) | air-gapped hosts, custom prefixes, no-pipeline installs |
 | 3. Docker | containerized server, ephemeral/infra-as-code hosts (see [Docker](#docker)) |
 
-### Method 1 — installer script (recommended)
+### Method 1, installer script (recommended)
 
 ```bash
 curl -fsSL https://fyrwall.docs.potenfyr.in/install.sh | sudo sh
@@ -163,7 +163,7 @@ Same script, straight from GitHub Releases:
 curl -fsSL https://github.com/PotenFYR-Studios/FYRwall/releases/latest/download/install.sh | sudo sh
 ```
 
-Review-first (safer — download, read, then run):
+Review-first (safer, download, read, then run):
 
 ```bash
 curl -fLo install-fyrwall.sh https://github.com/PotenFYR-Studios/FYRwall/releases/latest/download/install.sh
@@ -185,7 +185,7 @@ FYRWALL_PREFIX=/opt/fyrwall sudo -E sh install.sh
 FYRWALL_NO_DOWNLOAD=1 sudo -E sh install.sh    # air-gap enforcement: local tarball or dist/fyrwall only
 ```
 
-### Method 2 — manual tarball from GitHub Releases
+### Method 2, manual tarball from GitHub Releases
 
 ```bash
 curl -fLO https://github.com/PotenFYR-Studios/FYRwall/releases/latest/download/fyrwall_0.1.0_linux_amd64.tar.gz
@@ -202,7 +202,7 @@ sudo systemctl daemon-reload
 (Adjust version/arch in the filenames; `uname -m` → x86_64 is amd64,
 aarch64 is arm64.)
 
-### Method 3 — Docker
+### Method 3. Docker
 
 ```bash
 docker run -d --name fyrwall \
@@ -444,13 +444,13 @@ Every update creates a database backup and firewall restore point first; config 
 
 Every GitHub Release ships: `install.sh`, `uninstall.sh`, 7-architecture
 tarballs and a `SHA256SUMS` manifest covering all of it. The pipeline is
-idempotent — same version never duplicates, it replaces.
+idempotent, same version never duplicates, it replaces.
 
 | Event | What happens |
 |---|---|
 | push to `master` | CI test matrix + container image rebuild; all release artifacts are rebuilt and **replace** the current version's release assets in place; notes are regenerated with a single build line; rolling image tags refreshed |
 | version bump tag `vX.Y.Z` | Full release: release (re)created with changelog + installers + 7-arch tarballs + SHA256SUMS; new `:vX.Y.Z` image tag on top of rolling tags |
-| version tag re-pushed | Existing release for that tag is deleted (tag kept) and recreated — builds and changelog fully replaced |
+| version tag re-pushed | Existing release for that tag is deleted (tag kept) and recreated, builds and changelog fully replaced |
 | push to `docs/**` | Docs site auto-deploys to GitHub Pages |
 
 Same version, new commits = refreshed builds and regenerated changelog, no new release. Bumped version = new tag, new release, new image tag. Fully automatic. Details: [docs/content/releases.md](docs/content/releases.md).

@@ -1,8 +1,8 @@
 # Releases and CI Builds
 
 Every FYRwall release is built automatically by CI. A release ships three
-ways to install — installer script, standalone tarballs, and container
-images — plus SHA-256 checksums for everything.
+ways to install, installer script, standalone tarballs, and container
+images, plus SHA-256 checksums for everything.
 
 ## What a release contains
 
@@ -29,7 +29,7 @@ Docker images (amd64 + arm64) are pushed to
 
 ### Same-version replace semantics
 
-The release pipeline is idempotent — it never creates duplicate releases:
+The release pipeline is idempotent, it never creates duplicate releases:
 
 - **Re-pushing a version tag** (`v0.1.0` again, or a moved tag): the existing
   release for that tag is deleted (assets included; the git tag itself is
