@@ -7,14 +7,14 @@
 [![CI](https://img.shields.io/github/actions/workflow/status/PotenFYR-Studios/FYRwall/ci.yml?style=for-the-badge&logo=githubactions&logoColor=white&label=CI&labelColor=1c1e26&color=2ea043)](https://github.com/PotenFYR-Studios/FYRwall/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/PotenFYR-Studios/FYRwall?style=for-the-badge&logo=github&logoColor=white&label=Release&labelColor=1c1e26&color=eac54f)](https://github.com/PotenFYR-Studios/FYRwall/releases)
 [![Docker](https://img.shields.io/badge/ghcr.io-fyrwall-2496ED?style=for-the-badge&logo=docker&logoColor=white&labelColor=1c1e26)](https://github.com/PotenFYR-Studios/FYRwall/pkgs/container/fyrwall)
-[![Docs](https://img.shields.io/badge/Docs-fyrwall.docs.potenfyr.in-8b5cf6?style=for-the-badge&logo=readme&logoColor=white&labelColor=1c1e26)](https://fyrwall.docs.potenfyr.in/)
+[![Docs](https://img.shields.io/badge/Docs-github.com/PotenFYR-Studios/FYRwall-8b5cf6?style=for-the-badge&logo=readme&logoColor=white&labelColor=1c1e26)](https://github.com/PotenFYR-Studios/FYRwall/)
 [![License](https://img.shields.io/badge/License-Apache--2.0%20%2B%20Commons%20Clause-2ea043?style=for-the-badge&logo=apache&logoColor=white&labelColor=1c1e26)](https://github.com/PotenFYR-Studios/FYRwall/blob/master/LICENSE)
 [![View](https://komarev.com/ghpvc/?username=PotenFYR-Studios-FYRwall&color=ec4899&style=for-the-badge&label=VIEW&labelColor=1c1e26)](https://github.com/PotenFYR-Studios/FYRwall)
 
-[Overview](#overview) · [Install](#install) · [Quick Start](#quick-start) · [Docker](#docker) · [Docs](https://fyrwall.docs.potenfyr.in/) · [Extensions](#extensions) · [Releases](https://github.com/PotenFYR-Studios/FYRwall/releases)
+[Overview](#overview) · [Install](#install) · [Quick Start](#quick-start) · [Docker](#docker) · [Docs](https://github.com/PotenFYR-Studios/FYRwall/) · [Extensions](#extensions) · [Releases](https://github.com/PotenFYR-Studios/FYRwall/releases)
 
 ```bash
-curl -fsSL https://fyrwall.docs.potenfyr.in/install.sh | sudo sh
+curl -fsSL https://github.com/PotenFYR-Studios/FYRwall/releases/latest/download/install.sh | sudo sh
 ```
 
 </div>
@@ -154,7 +154,7 @@ rules. Full details: [docs/content/installation.md](docs/content/installation.md
 ### Method 1, installer script (recommended)
 
 ```bash
-curl -fsSL https://fyrwall.docs.potenfyr.in/install.sh | sudo sh
+curl -fsSL https://github.com/PotenFYR-Studios/FYRwall/releases/latest/download/install.sh | sudo sh
 ```
 
 Same script, straight from GitHub Releases:
@@ -528,7 +528,7 @@ Matrix covers Debian (bookworm, bullseye), Ubuntu, Alpine (musl), Fedora, Rocky,
 
 ## Docs site
 
-Full documentation lives at [fyrwall.docs.potenfyr.in](https://fyrwall.docs.potenfyr.in/) with installation, configuration, operation, security model, architecture, safety and restore points, extension development, updating and troubleshooting guides. Built with Vite + React + TypeScript via bun; every route is prerendered to real HTML with per-route titles, canonical URLs, Open Graph and JSON-LD structured data (sitemap, robots included). The github.io path keeps working as a redirect.
+Full documentation lives at [github.com/PotenFYR-Studios/FYRwall](https://github.com/PotenFYR-Studios/FYRwall/) with installation, configuration, operation, security model, architecture, safety and restore points, extension development, updating and troubleshooting guides. Built with Vite + React + TypeScript via bun; every route is prerendered to real HTML with per-route titles, canonical URLs, Open Graph and JSON-LD structured data (sitemap, robots included). The github.io path keeps working as a redirect.
 
 ## ⭐ Star History
 
@@ -618,7 +618,7 @@ are fine. Questions or a commercial exception: [contact the org](https://potenfy
 [![GitHub](https://img.shields.io/badge/GitHub-PotenFYR--Studios-181717?style=for-the-badge&logo=github&logoColor=white&labelColor=1c1e26)](https://github.com/PotenFYR-Studios)
 [![Website](https://img.shields.io/badge/Website-potenfyr.in-8b5cf6?style=for-the-badge&logo=googlechrome&logoColor=white&labelColor=1c1e26)](https://potenfyr.in/)
 [![Community](https://img.shields.io/badge/Community-Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white&labelColor=1c1e26)](https://discord.com/invite/zUaN2FPBec)
-[![Docs](https://img.shields.io/badge/Docs-fyrwall.docs.potenfyr.in-f97316?style=for-the-badge&logo=readme&logoColor=white&labelColor=1c1e26)](https://fyrwall.docs.potenfyr.in/)
+[![Docs](https://img.shields.io/badge/Docs-github.com/PotenFYR-Studios/FYRwall-f97316?style=for-the-badge&logo=readme&logoColor=white&labelColor=1c1e26)](https://github.com/PotenFYR-Studios/FYRwall/)
 
 <!-- markdownlint-disable -->
 <div align="center">

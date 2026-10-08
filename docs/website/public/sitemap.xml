@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- The docs app uses hash routing (#/docs/...), so "/" is the only
-     server-visible URL. Hash fragments are not distinct sitemap URLs. -->
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://fyrwall.docs.potenfyr.in/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
-</urlset>
