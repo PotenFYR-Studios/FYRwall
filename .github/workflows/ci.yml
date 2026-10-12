@@ -4,6 +4,7 @@ on:
   push:
     branches: [master]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -71,10 +72,21 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
+      # Dedicated cache so this job's all-arch build cache is actually
+      # saved (the shared setup-go key would collide with the test job and
+      # never be written back, forcing a cold rebuild every run).
       - uses: actions/setup-go@v7
         with:
           go-version: ${{ env.GO_VERSION }}
-          cache: true
+          cache: false
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: go-cross-${{ runner.os }}-${{ env.GO_VERSION }}-${{ hashFiles('go.sum') }}
+          restore-keys: |
+            go-cross-${{ runner.os }}-${{ env.GO_VERSION }}-
       - name: Build every supported linux arch
         run: |
           set -euo pipefail
