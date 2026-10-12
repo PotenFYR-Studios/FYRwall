@@ -25,17 +25,12 @@ Frontend (web UI):
     cd web && bun install             # deps
     cd web && bun run build           # production build
 
-Docs site (this directory drives fyrwall.docs.potenfyr.in):
+Docs site:
 
-    cd docs && bun install            # deps
-    cd docs && bun run dev            # dev server with HMR
-    cd docs && bun run build          # build + prerender all routes to dist/
-    cd docs && bun run typecheck      # tsc --noEmit
-
-Docs content is plain markdown in `docs/content/*.md`; the site imports it
-directly at build time, so editing a file there is all it takes. The
-install script shown on the site is synced from `packaging/install.sh`
-during the build.
+Documentation is unified in the central hub at
+https://docs.potenfyr.in (FYRwall pages live under
+`/#/repo/fyrwall/...`). It is no longer built from this repository, and
+CI does not run a docs build. Edit docs in the hub repo.
 
 Cross-compile and release:
 

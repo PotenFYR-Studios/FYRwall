@@ -5,7 +5,7 @@ contact_links:
     url: https://discord.com/invite/zUaN2FPBec
   - name: Documentation
     about: Install, configuration, safety model and troubleshooting guides.
-    url: https://fyrwall.docs.potenfyr.in/
+    url: https://docs.potenfyr.in/
   - name: Security vulnerability
     about: Please use private vulnerability reporting, not public issues.
     url: https://github.com/PotenFYR-Studios/FYRwall/security/advisories/new

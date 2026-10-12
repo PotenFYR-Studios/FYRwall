@@ -12,14 +12,47 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  GO_VERSION: "1.26"
+
 jobs:
+  # Native Go test pass with the module + build caches warmed by setup-go.
+  # Runs the same suite as the isolated container below, but is cached so
+  # everyday pushes finish in seconds instead of rebuilding a container.
   test:
-    name: Tests (Docker)
+    name: Tests (Go)
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
-      - name: Build test image
-        run: docker build -f Dockerfile.test -t fyrwall-test:latest .
+      - uses: actions/setup-go@v7
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+      - name: go vet
+        run: go vet ./...
+      - name: go test (race)
+        run: go test -count=1 -race ./...
+
+  # Same suite inside the hardened, offline container. Kept as the
+  # authoritative "no network, read-only rootfs" verification; the image
+  # build itself is cached through the GitHub Actions build cache.
+  container-test:
+    name: Tests (Docker, offline)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/setup-buildx-action@v4
+      - name: Build test image (cached)
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: Dockerfile.test
+          load: true
+          tags: fyrwall-test:latest
+          cache-from: type=gha,scope=fyrwall-test
+          cache-to: type=gha,mode=max,scope=fyrwall-test
       - name: Run test suite in container (offline, read-only)
         run: |
           docker run --rm --network=none --read-only \
@@ -27,29 +60,51 @@ jobs:
             --cap-drop=ALL --security-opt no-new-privileges \
             -e GOPROXY=off -e GOCACHE=/tmp/go-cache \
             -v "$PWD":/src:ro fyrwall-test:latest \
-            go test -count=1 -v ./...
+            go test -count=1 -race ./...
 
-  arch-matrix:
-    name: Cross-compile (${{ matrix.arch }})
+  # One job instead of a 7-way matrix: the arches share a single module +
+  # build cache, so warm runs cross-compile the whole matrix in seconds and
+  # the runner spin-up cost is paid once.
+  cross-compile:
+    name: Cross-compile (linux, 7 arches)
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        arch: [amd64, arm64, arm, 386, ppc64le, s390x, riscv64]
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-go@v7
         with:
-          go-version: "1.26"
-      - name: Build linux/${{ matrix.arch }}
-        run: GOOS=linux GOARCH=${{ matrix.arch }} CGO_ENABLED=0 go build -trimpath -o /dev/null ./cmd/fyrwall
-      - name: Vet linux/${{ matrix.arch }}
-        run: GOOS=linux GOARCH=${{ matrix.arch }} CGO_ENABLED=0 go vet ./...
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+      - name: Build every supported linux arch
+        run: |
+          set -euo pipefail
+          for arch in amd64 arm64 arm 386 ppc64le s390x riscv64; do
+            echo "::group::build linux/$arch"
+            GOOS=linux GOARCH="$arch" CGO_ENABLED=0 \
+              go build -trimpath -o /dev/null ./cmd/fyrwall
+            echo "::endgroup::"
+          done
+      # 32-bit overflow safety: vet-compile the test tree for the two
+      # 32-bit targets (matches scripts/docker-matrix.sh).
+      - name: Vet 32-bit targets
+        run: |
+          set -euo pipefail
+          for arch in 386 arm; do
+            echo "::group::vet linux/$arch"
+            GOOS=linux GOARCH="$arch" CGO_ENABLED=0 go vet ./...
+            echo "::endgroup::"
+          done
 
   frontend:
     name: Frontend (bun)
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
-      - run: cd web && bun install --frozen-lockfile && bun run build
-      - run: cd docs && bun install --frozen-lockfile && bun run build && bun run typecheck
+      # `bun run build` runs `tsc --noEmit` before vite, so this step is
+      # also the type check. The docs site lives in the separate
+      # PotenFYR-Studios/docs repository and is no longer built here.
+      - name: Build web UI
+        working-directory: web
+        run: bun install --frozen-lockfile && bun run build

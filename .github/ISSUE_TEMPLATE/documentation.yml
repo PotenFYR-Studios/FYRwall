@@ -13,7 +13,7 @@ body:
     attributes:
       label: Where is the problem?
       options:
-        - Docs site (fyrwall.docs.potenfyr.in)
+        - Docs site (docs.potenfyr.in)
         - README
         - CONTRIBUTING.md
         - SECURITY.md
@@ -25,7 +25,7 @@ body:
     attributes:
       label: Page or section
       description: URL or file path, plus the heading if you know it.
-      placeholder: https://fyrwall.docs.potenfyr.in/docs/installation/
+      placeholder: https://docs.potenfyr.in/#/repo/fyrwall/installation
     validations:
       required: true
   - type: textarea

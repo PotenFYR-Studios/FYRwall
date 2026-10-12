@@ -143,7 +143,7 @@ test/                   Fixtures
 
 Three supported ways to install. Every method ships from GitHub Releases,
 installs the same single static binary, and never touches your firewall
-rules. Full details: [docs/content/installation.md](docs/content/installation.md) · [Releases and CI builds](docs/content/releases.md).
+rules. Full details: [Installation](https://docs.potenfyr.in/#/repo/fyrwall/installation) · [Releases and CI builds](https://docs.potenfyr.in/#/repo/fyrwall/releases).
 
 | Method | Best for |
 |---|---|
@@ -420,7 +420,7 @@ docker compose up -d
 The server consumes the agent's typed Unix socket; only the sidecar gets the
 host namespace and firewall capabilities. Remote agents dial out through
 authenticated, restart-safe long-poll sessions, requiring no inbound management
-port on targets. Full guide: [docs/content/docker.md](docs/content/docker.md).
+port on targets. Full guide: [Running FYRwall in Docker](https://docs.potenfyr.in/#/repo/fyrwall/docker).
 
 ## Updating
 
@@ -438,7 +438,7 @@ fyrwall update check    # compare installed vs latest manifest
 fyrwall update apply    # backup + restore point + verified download + migrate + restart
 ```
 
-Every update creates a database backup and firewall restore point first; config is never overwritten. Re-running the curl one-liner is always a safe in-place upgrade. See [docs/content/updating.md](docs/content/updating.md).
+Every update creates a database backup and firewall restore point first; config is never overwritten. Re-running the curl one-liner is always a safe in-place upgrade. See [Updating](https://docs.potenfyr.in/#/repo/fyrwall/updating).
 
 ## Auto build, releases and containers
 
@@ -451,9 +451,8 @@ idempotent, same version never duplicates, it replaces.
 | push to `master` | CI test matrix + container image rebuild; all release artifacts are rebuilt and **replace** the current version's release assets in place; notes are regenerated with a single build line; rolling image tags refreshed |
 | version bump tag `vX.Y.Z` | Full release: release (re)created with changelog + installers + 7-arch tarballs + SHA256SUMS; new `:vX.Y.Z` image tag on top of rolling tags |
 | version tag re-pushed | Existing release for that tag is deleted (tag kept) and recreated, builds and changelog fully replaced |
-| push to `docs/**` | Docs site auto-deploys to GitHub Pages |
 
-Same version, new commits = refreshed builds and regenerated changelog, no new release. Bumped version = new tag, new release, new image tag. Fully automatic. Details: [docs/content/releases.md](docs/content/releases.md).
+Same version, new commits = refreshed builds and regenerated changelog, no new release. Bumped version = new tag, new release, new image tag. Fully automatic. Details: [Releases and CI builds](https://docs.potenfyr.in/#/repo/fyrwall/releases).
 
 ## Architecture
 
@@ -492,7 +491,7 @@ sudo fyrwall extension install ./my-extension   # prompts per capability
 sudo fyrwall extension list
 ```
 
-Developer guide with full manifest reference: [docs/content/extensions-guide.md](docs/content/extensions-guide.md).
+Developer guide with full manifest reference: [Extensions developer guide](https://docs.potenfyr.in/#/repo/fyrwall/extensions-guide).
 
 ## Installed application: console command, tray and app menu
 

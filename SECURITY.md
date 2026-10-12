@@ -66,7 +66,7 @@ otherwise.
 ## Firewall safety guarantees
 
 The product's core promise is documented in
-[docs/content/safety.md](docs/content/safety.md): every change runs
+[Firewall safety guarantees](https://docs.potenfyr.in/#/repo/fyrwall/safety): every change runs
 through validate -> snapshot -> apply -> verify -> commit, with automatic
 rollback and a critical notification if rollback itself fails. Reports
 that break any of these guarantees are treated as high priority.
