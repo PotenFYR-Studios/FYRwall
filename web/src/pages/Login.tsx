@@ -33,11 +33,11 @@ export default function Login() {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-zinc-950 px-4" data-testid="login-page">
-      <DotPattern className="fill-zinc-700/30 [mask-image:radial-gradient(320px_circle_at_center,white,transparent)]" />
+      <DotPattern className="fill-zinc-700/30 mask-[radial-gradient(320px_circle_at_center,white,transparent)]" />
       <BlurFade className="relative w-full max-w-sm">
         <form
           onSubmit={onSubmit}
-          className="rounded-xl border border-zinc-800 bg-zinc-900/80 p-6 shadow-2xl shadow-orange-950/20 backdrop-blur"
+          className="rounded-xl border border-zinc-800 bg-zinc-900/80 p-6 shadow-2xl shadow-orange-950/20 backdrop-blur-sm"
         >
           <div className="mb-6 flex flex-col items-center gap-2">
             <div className="flex h-12 w-12 items-center justify-center rounded-full border border-fyr-500/30 bg-fyr-500/10">
@@ -50,7 +50,7 @@ export default function Login() {
           </div>
 
           {error && (
-            <div className="mb-4 rounded border border-red-900 bg-red-950/40 px-3 py-2 text-sm text-red-300" role="alert">
+            <div className="mb-4 rounded-sm border border-red-900 bg-red-950/40 px-3 py-2 text-sm text-red-300" role="alert">
               {error}
             </div>
           )}
@@ -66,7 +66,7 @@ export default function Login() {
               onChange={(e) => setUsername(e.target.value)}
               autoComplete="username"
               required
-              className="w-full rounded border border-zinc-700 bg-zinc-950 py-2 pl-9 pr-3 text-sm text-zinc-100 placeholder-zinc-600 focus:border-fyr-500 focus:outline-none"
+              className="w-full rounded-sm border border-zinc-700 bg-zinc-950 py-2 pl-9 pr-3 text-sm text-zinc-100 placeholder-zinc-600 focus:border-fyr-500 focus:outline-hidden"
               placeholder="admin"
             />
           </div>
@@ -83,7 +83,7 @@ export default function Login() {
               onChange={(e) => setPassword(e.target.value)}
               autoComplete="current-password"
               required
-              className="w-full rounded border border-zinc-700 bg-zinc-950 py-2 pl-9 pr-3 text-sm text-zinc-100 placeholder-zinc-600 focus:border-fyr-500 focus:outline-none"
+              className="w-full rounded-sm border border-zinc-700 bg-zinc-950 py-2 pl-9 pr-3 text-sm text-zinc-100 placeholder-zinc-600 focus:border-fyr-500 focus:outline-hidden"
               placeholder="••••••••••••"
             />
           </div>
@@ -91,7 +91,7 @@ export default function Login() {
           <button
             type="submit"
             disabled={busy}
-            className="flex w-full items-center justify-center gap-2 rounded bg-fyr-600 py-2 text-sm font-semibold text-white transition hover:bg-fyr-500 disabled:opacity-50"
+            className="flex w-full items-center justify-center gap-2 rounded-sm bg-fyr-600 py-2 text-sm font-semibold text-white transition hover:bg-fyr-500 disabled:opacity-50"
           >
             {busy && <LoaderCircle className="h-4 w-4 animate-spin" />}
             Sign in

@@ -20,7 +20,7 @@ export default function Health() {
       </h2>
       <ul className="space-y-2">
         {data.components.map((c) => (
-          <li key={c.name} className="rounded border border-zinc-800 bg-zinc-900 p-3 flex items-center gap-3">
+          <li key={c.name} className="rounded-sm border border-zinc-800 bg-zinc-900 p-3 flex items-center gap-3">
             <span
               className={`text-xs px-2 py-0.5 rounded ${
                 c.status === "HEALTHY"

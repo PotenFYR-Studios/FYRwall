@@ -45,10 +45,10 @@ export default function Notifications() {
       {items.map((n) => (
         <li
           key={n.id}
-          className="relative overflow-hidden rounded border border-zinc-800 bg-zinc-900 p-3"
+          className="relative overflow-hidden rounded-sm border border-zinc-800 bg-zinc-900 p-3"
         >
           <div className="flex items-center gap-2">
-            <span className={`text-xs px-2 py-0.5 rounded ${sevColor[n.severity] ?? sevColor.info}`}>
+            <span className={`text-xs px-2 py-0.5 rounded-sm ${sevColor[n.severity] ?? sevColor.info}`}>
               {n.severity}
             </span>
             <span className="font-medium">{n.code}</span>
@@ -59,7 +59,7 @@ export default function Notifications() {
             <button
               onClick={() => dismiss.mutate(n.id)}
               disabled={dismiss.isPending}
-              className="ml-auto rounded border border-zinc-800 px-2 py-0.5 text-xs text-zinc-400 transition hover:text-white"
+              className="ml-auto rounded-sm border border-zinc-800 px-2 py-0.5 text-xs text-zinc-400 transition hover:text-white"
             >
               Dismiss
             </button>

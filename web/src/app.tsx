@@ -38,9 +38,9 @@ function Shell({ children }: { children: React.ReactNode }) {
     <div className="relative min-h-screen bg-zinc-950 text-zinc-100">
       <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-80 overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(249,115,22,0.16),transparent_65%)] blur-2xl" />
-        <DotPattern className="h-full w-full fill-amber-500/20 [mask-image:radial-gradient(70%_60%_at_50%_0%,white,transparent)]" />
+        <DotPattern className="h-full w-full fill-amber-500/20 mask-[radial-gradient(70%_60%_at_50%_0%,white,transparent)]" />
       </div>
-      <header className="sticky top-0 z-10 border-b border-zinc-800 bg-zinc-950/90 px-6 py-3 backdrop-blur">
+      <header className="sticky top-0 z-10 border-b border-zinc-800 bg-zinc-950/90 px-6 py-3 backdrop-blur-sm">
         <div className="mx-auto flex max-w-7xl items-center gap-6">
           <span className="flex items-center gap-2 font-bold text-lg">
             <ShieldCheck className="h-5 w-5 text-fyr-500" />
@@ -52,7 +52,7 @@ function Shell({ children }: { children: React.ReactNode }) {
                 key={n.to}
                 to={n.to}
                 className={({ isActive }) =>
-                  `rounded px-2.5 py-1 text-sm transition ${isActive ? "bg-zinc-800 text-white" : "text-zinc-400 hover:bg-zinc-900 hover:text-white"}`
+                  `rounded-sm px-2.5 py-1 text-sm transition ${isActive ? "bg-zinc-800 text-white" : "text-zinc-400 hover:bg-zinc-900 hover:text-white"}`
                 }
               >
                 {n.label}
@@ -70,7 +70,7 @@ function Shell({ children }: { children: React.ReactNode }) {
               onClick={logout}
               title="Sign out"
               data-testid="logout"
-              className="flex items-center gap-1.5 rounded border border-zinc-800 px-2.5 py-1 text-xs text-zinc-400 transition hover:border-zinc-700 hover:text-white"
+              className="flex items-center gap-1.5 rounded-sm border border-zinc-800 px-2.5 py-1 text-xs text-zinc-400 transition hover:border-zinc-700 hover:text-white"
             >
               <LogOut className="h-3.5 w-3.5" />
               Sign out

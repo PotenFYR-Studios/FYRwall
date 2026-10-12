@@ -67,11 +67,11 @@ export default function Setup() {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-zinc-950 px-4" data-testid="setup-page">
-      <DotPattern className="fill-zinc-700/30 [mask-image:radial-gradient(320px_circle_at_center,white,transparent)]" />
+      <DotPattern className="fill-zinc-700/30 mask-[radial-gradient(320px_circle_at_center,white,transparent)]" />
       <BlurFade className="relative w-full max-w-md">
         <form
           onSubmit={onSubmit}
-          className="relative overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/80 p-6 shadow-2xl shadow-orange-950/20 backdrop-blur"
+          className="relative overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/80 p-6 shadow-2xl shadow-orange-950/20 backdrop-blur-sm"
         >
           <BorderBeam size={60} duration={8} />
           <div className="mb-6 flex flex-col items-center gap-2">
@@ -88,7 +88,7 @@ export default function Setup() {
           </div>
 
           {error && (
-            <div className="mb-4 rounded border border-red-900 bg-red-950/40 px-3 py-2 text-sm text-red-300" role="alert">
+            <div className="mb-4 rounded-sm border border-red-900 bg-red-950/40 px-3 py-2 text-sm text-red-300" role="alert">
               {error}
             </div>
           )}
@@ -103,7 +103,7 @@ export default function Setup() {
             autoComplete="username"
             required
             minLength={3}
-            className="mb-4 w-full rounded border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 focus:border-fyr-500 focus:outline-none"
+            className="mb-4 w-full rounded-sm border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 focus:border-fyr-500 focus:outline-hidden"
             placeholder="admin"
           />
 
@@ -117,7 +117,7 @@ export default function Setup() {
             onChange={(e) => setPassword(e.target.value)}
             autoComplete="new-password"
             required
-            className="mb-1 w-full rounded border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 focus:border-fyr-500 focus:outline-none"
+            className="mb-1 w-full rounded-sm border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 focus:border-fyr-500 focus:outline-hidden"
             placeholder="Choose a strong password"
           />
           <input
@@ -127,7 +127,7 @@ export default function Setup() {
             onChange={(e) => setConfirm(e.target.value)}
             autoComplete="new-password"
             required
-            className="mb-4 mt-3 w-full rounded border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 focus:border-fyr-500 focus:outline-none"
+            className="mb-4 mt-3 w-full rounded-sm border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 focus:border-fyr-500 focus:outline-hidden"
             placeholder="Repeat password"
           />
 
@@ -143,7 +143,7 @@ export default function Setup() {
           <button
             type="submit"
             disabled={busy || !allOk}
-            className="flex w-full items-center justify-center gap-2 rounded bg-fyr-600 py-2 text-sm font-semibold text-white transition hover:bg-fyr-500 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex w-full items-center justify-center gap-2 rounded-sm bg-fyr-600 py-2 text-sm font-semibold text-white transition hover:bg-fyr-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {busy ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
             Create super admin

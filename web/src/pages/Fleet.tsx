@@ -99,7 +99,7 @@ export default function Fleet() {
           <h1 className="mt-1 text-3xl font-bold tracking-tight">Managed targets</h1>
           <p className="mt-2 max-w-2xl text-sm text-zinc-400">Outbound agents synchronize firewall state, drift hashes, health, inventory, and policy revisions.</p>
         </div>
-        <button onClick={() => createToken.mutate()} className="rounded bg-amber-400 px-4 py-2 text-sm font-semibold text-zinc-950 hover:bg-amber-300">Create 15-minute enrollment token</button>
+        <button onClick={() => createToken.mutate()} className="rounded-sm bg-amber-400 px-4 py-2 text-sm font-semibold text-zinc-950 hover:bg-amber-300">Create 15-minute enrollment token</button>
       </div>
 
       {token && <div className="flex items-center gap-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-4"><code className="min-w-0 flex-1 break-all text-sm text-amber-200">{token}</code><button title="Copy token" onClick={() => navigator.clipboard.writeText(token)}><Copy className="h-4 w-4" /></button></div>}
@@ -135,7 +135,7 @@ export default function Fleet() {
               initial={reducedMotion ? { opacity: 0 } : { opacity: 0, y: 18 }}
               animate={reducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
               transition={reducedMotion ? { delay: index * 0.025, duration: 0.2 } : { delay: index * 0.055, duration: 0.4 }}
-              className={`relative overflow-hidden rounded-xl border bg-gradient-to-br from-zinc-900 to-zinc-950 p-5 ${needsAttention(agent) ? "border-amber-500/40" : "border-zinc-800"}`}
+              className={`relative overflow-hidden rounded-xl border bg-linear-to-br from-zinc-900 to-zinc-950 p-5 ${needsAttention(agent) ? "border-amber-500/40" : "border-zinc-800"}`}
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex gap-3">
@@ -162,7 +162,7 @@ export default function Fleet() {
                 <Metric label="Platform" value={`${agent.distribution || "Linux"} / ${agent.architecture}`} />
                 <Metric label="Policy revision" value={String(agent.policy_revision)} />
               </div>
-            {!!agent.groups?.length && <div className="mt-3 flex flex-wrap gap-1">{agent.groups.map((group) => <span key={group} className="rounded bg-zinc-800 px-2 py-1 text-[10px] uppercase tracking-wide text-zinc-400">{group}</span>)}</div>}
+            {!!agent.groups?.length && <div className="mt-3 flex flex-wrap gap-1">{agent.groups.map((group) => <span key={group} className="rounded-sm bg-zinc-800 px-2 py-1 text-[10px] uppercase tracking-wide text-zinc-400">{group}</span>)}</div>}
             <div className="mt-4 flex items-center justify-between border-t border-zinc-800 pt-4"><span className="text-xs text-zinc-500">Seen {agent.last_seen_at ? new Date(agent.last_seen_at).toLocaleString() : "never"}</span><div className="flex gap-3"><button disabled={!online || refresh.isPending} onClick={() => refresh.mutate(agent.agent_id)} className="text-xs text-amber-400 disabled:text-zinc-700">Request status</button><button onClick={() => { if (confirm(`Revoke ${agent.display_name || agent.hostname}?`)) revoke.mutate(agent.agent_id); }} className="text-xs text-red-400">Revoke</button></div></div>
             </motion.article>
           );
