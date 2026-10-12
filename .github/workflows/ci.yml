@@ -54,6 +54,9 @@ jobs:
           tags: fyrwall-test:latest
           cache-from: type=gha,scope=fyrwall-test
           cache-to: type=gha,mode=max,scope=fyrwall-test
+      # Race detection is covered by the fast native job above; here we
+      # verify the suite under the hardened container. Skipping -race keeps
+      # the offline run from recompiling the whole tree in the tmpfs cache.
       - name: Run test suite in container (offline, read-only)
         run: |
           docker run --rm --network=none --read-only \
@@ -61,7 +64,7 @@ jobs:
             --cap-drop=ALL --security-opt no-new-privileges \
             -e GOPROXY=off -e GOCACHE=/tmp/go-cache \
             -v "$PWD":/src:ro fyrwall-test:latest \
-            go test -count=1 -race ./...
+            go test -count=1 ./...
 
   # One job instead of a 7-way matrix: the arches share a single module +
   # build cache, so warm runs cross-compile the whole matrix in seconds and
